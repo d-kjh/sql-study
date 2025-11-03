@@ -184,3 +184,33 @@ SET profiling = 0;
 
 SHOW PROFILES;
 
+-- 모든 배우의 배우ID, 이름 및 성을 검색합니다.
+-- 성 기준으로 정렬한 다음 이름 기준으로 정렬합니다.
+
+SELECT actor_id, first_name, last_name
+FROM actor
+ORDER BY last_name, first_name;
+
+-- 성이 'WILLIAMS' 또는 'DAVIS'인 모든 배우의 배우 ID, 성, 이름
+
+SELECT actor_id, first_name, last_name
+FROM actor
+WHERE last_name = 'WILLIAMS' OR last_name = 'DAVIS';
+
+SELECT actor_id, first_name, last_name
+FROM actor
+WHERE last_name IN ('WILLIAMS', 'DAVIS');
+
+-- rental 테이블에서 2005년 7월 5일 영화를 대여한 고객의 ID를 반환하는
+-- 쿼리를 작성한다
+
+SELECT customer_id FROM rental
+WHERE rental_date BETWEEN '2005-07-05 00:00:00'
+AND '2005-07-05 23:59:59';
+
+-- 2005년 6월 14일 이외의 날짜에 대여한 영화에 대한 모든 이메일 주소를 반환
+
+SELECT DISTINCT c.email FROM customer c
+INNER JOIN rental r ON r.customer_id = c.customer_id
+WHERE r.rental_date < '2005-06-14 00:00:00' 
+OR r.rental_date > '2005-06-14 23:59:59';
