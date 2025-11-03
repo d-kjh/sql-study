@@ -154,3 +154,33 @@ WHERE rental_duration >= 7 AND rating = 'G';
 SELECT * FROM film
 WHERE (rental_duration >= 7 AND rating = 'G') 
 OR (rating = 'PG-13' AND rental_duration <= 3);
+
+-- 40편 이상의 영화를 대여한 모든 고객의 정보
+-- 표시 컬럼: 이름, 성, 갯수
+
+SELECT c.customer_id, c.first_name, c.last_name, COUNT(r.customer_id)
+FROM customer c
+INNER JOIN rental r ON r.customer_id = c.customer_id
+GROUP BY r.customer_id HAVING COUNT(r.customer_id) >= 40;
+
+
+-- 2005년 06월 14일에 대여한 모든 고객 정보
+SELECT c.*
+FROM customer c
+INNER JOIN rental r ON r.customer_id = c.customer_id
+WHERE DATE(r.rental_date) = '2005-06-14';
+
+SELECT c.first_name, c.last_name, r.rental_date
+FROM customer c
+INNER JOIN rental r
+ON r.customer_id = c.customer_id
+WHERE r.rental_date BETWEEN '2005-06-14 00:00:00' 
+AND '2005-06-14 23:59:59';
+
+-- 프로파일링
+SELECT @@profiling;
+
+SET profiling = 0;
+
+SHOW PROFILES;
+
