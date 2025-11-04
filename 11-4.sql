@@ -188,5 +188,12 @@ FROM customer c
 WHERE 20 = (SELECT COUNT(1) FROM rental r
 				WHERE r.customer_id = c.customer_id);
 
+-- 1)
+SELECT c.first_name, c.last_name, c.customer_id
+FROM customer c;
 
+-- 2)
+SELECT COUNT(1) cnt, r.customer_id FROM rental r
+WHERE r.customer_id
+GROUP BY r.customer_id HAVING cnt = 20;
 
