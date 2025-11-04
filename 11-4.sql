@@ -109,7 +109,7 @@ ON a.actor_id = fa.actor_id
 WHERE (a.first_name = 'CATE' AND a.last_name = 'MCQUEEN')
 OR (a.first_name = 'CUBA' AND a.last_name = 'BIRCH');
 
-SELECT f.title FROM film f
+SELECT f.film_id, f.title , a.first_name, a.last_name FROM film f
 INNER JOIN film_actor fa
 ON fa.film_id = f.film_id
 INNER JOIN actor a
@@ -117,8 +117,60 @@ ON a.actor_id = fa.actor_id
 WHERE (a.first_name, a.last_name)
 IN (('Cate', 'McQueen'), ('Cuba', 'Birch'));
 
+-- Cate McQueen과 Cuba Birch가 함께 출연한 모든 영화 조회
+-- 82, 899
+SELECT f.film_id, f.title
+FROM film f
+INNER JOIN film_actor fa
+ON fa.film_id = f.film_id
+INNER JOIN actor a
+ON a.actor_id = fa.actor_id
+INNER JOIN film_actor fa2
+ON fa2.film_id = f.film_id
+INNER JOIN actor a2
+ON a2.actor_id = fa2.actor_id
+WHERE (a.first_name = 'Cate' AND a.last_name = 'McQueen')
+AND (a2.first_name = 'Cuba' AND a2.last_name = 'Birch');
 
+SELECT f.film_id, f.title
+FROM film f
+INNER JOIN film_actor fa
+ON fa.film_id = f.film_id
+INNER JOIN actor a
+ON a.actor_id = fa.actor_id
+AND (a.first_name = 'Cate' AND a.last_name = 'McQueen')
+INNER JOIN film_actor fa2
+ON fa2.film_id = f.film_id
+INNER JOIN actor a2
+ON a2.actor_id = fa2.actor_id
+AND (a2.first_name = 'Cuba' AND a2.last_name = 'Birch');
 
+SELECT f.film_id, f.title
+FROM film f
+JOIN film_actor fa
+ON f.film_id = fa.film_id
+JOIN actor a
+ON fa.actor_id = a.actor_id
+WHERE (first_name = 'CUBA' AND last_name = 'BIRCH')
+OR (first_name = 'CATE' AND last_name = 'MCQUEEN')
+GROUP BY f.title, f.film_id
+HAVING COUNT(a.actor_id) = 2;
 
-
-
+-- intersect (교집합) 가장빠름
+SELECT fm.film_id, fm.title
+FROM film_actor f
+JOIN actor a
+ON f.actor_id = a.actor_id
+JOIN film fm
+ON fm.film_id = f.film_id
+WHERE a.first_name = 'Cuba'
+AND a.last_name = 'Birch'
+INTERSECT
+SELECT fm.film_id, fm.title
+FROM film_actor f
+JOIN actor a
+ON f.actor_id = a.actor_id
+JOIN film fm
+ON fm.film_id = f.film_id
+WHERE a.first_name = 'Cate'
+AND a.last_name = 'McQueen';
