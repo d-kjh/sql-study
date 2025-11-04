@@ -174,3 +174,19 @@ JOIN film fm
 ON fm.film_id = f.film_id
 WHERE a.first_name = 'Cate'
 AND a.last_name = 'McQueen';
+
+-- 상관 서브쿼리
+
+/* 
+고객의 영화 대여 횟수가 정확히 20번 대여를 한 고객 조회
+1.메인쿼리 -> 서브쿼리로 전달
+2. 서브쿼리 -> 메인쿼리로 전달
+3. 메인쿼리 결과 도출 
+*/
+SELECT c.first_name, c.last_name
+FROM customer c
+WHERE 20 = (SELECT COUNT(1) FROM rental r
+				WHERE r.customer_id = c.customer_id);
+
+
+
