@@ -80,5 +80,45 @@ FROM address a
 INNER JOIN customer c 
 ON c.address_id = a.address_id;
 
+/* 이름, 성, 살고 있는 도시
+*/
+
+SELECT c.last_name, c.first_name, cc.city
+FROM address a
+INNER JOIN customer c 
+ON c.address_id = a.address_id
+INNER JOIN city cc
+ON cc.city_id = a.city_id;
+
+-- 캘리포니아에 거주하는 모든 고객의 이름,성, 주소 및 도시 조화
+
+SELECT cm.last_name, cm.first_name, c.city FROM customer cm
+INNER JOIN address a
+ON a.address_id = cm.address_id
+INNER JOIN city c
+ON c.city_id = a.city_id
+WHERE a.district = 'California';
+
+-- Cate McQueen 또는 Cuba Birch 가 출연한 모든 영화를 조회
+
+SELECT f.title FROM film f
+INNER JOIN film_actor fa
+ON fa.film_id = f.film_id
+INNER JOIN actor a
+ON a.actor_id = fa.actor_id
+WHERE (a.first_name = 'CATE' AND a.last_name = 'MCQUEEN')
+OR (a.first_name = 'CUBA' AND a.last_name = 'BIRCH');
+
+SELECT f.title FROM film f
+INNER JOIN film_actor fa
+ON fa.film_id = f.film_id
+INNER JOIN actor a
+ON a.actor_id = fa.actor_id
+WHERE (a.first_name, a.last_name)
+IN (('Cate', 'McQueen'), ('Cuba', 'Birch'));
+
+
+
+
 
 
