@@ -38,10 +38,47 @@ SELECT title, rating FROM film
 WHERE rating IN 
 (SELECT rating FROM film WHERE title LIKE '%PET%');
 
+-- 성이 Q로 시작하는 고객 조회
+SELECT * FROM customer
+WHERE last_name LIKE 'Q%';
 
+SELECT * FROM customer
+WHERE LEFT(last_name, 1) = 'Q';
 
+SELECT * FROM customer
+WHERE last_name > 'Q' AND last_name < 'R';
 
+-- 대여를 반납하지 않은 정보를 조회
+-- 표시 컬럼 대여ID, 고객ID
+SELECT rental_id, customer_id FROM rental
+WHERE return_date IS NULL;
 
+/* 고객번호가 5가 아니면서 결제날짜가 '2005-08-23'이거나
+결제금액이 8달러 이상인 payment_id를 조회하시오
+
+문자열 비교보다 숫자비교를 먼저하는게 성능이 무조건 좋다
+*/
+
+SELECT payment_id FROM payment
+WHERE customer_id != 5 
+AND (payment_date BETWEEN '2005-08-23 00:00:00' 
+AND '2005-08-23 23:59:59' OR amount >= 8.00);
+
+-- payments 테이블에서 금액이 1.98, 7.98 또는 9.98인 모든행을 조회
+SELECT * FROM payment
+WHERE amount IN(1.98, 7.98, 9.98);
+
+-- 성의 두 번째 위치에 A가 있고 A 다음에 W가 있는 모든 고객을 조회
+
+SELECT * FROM customer
+WHERE last_name LIKE '_AW%';
+
+-- 모든 고객의 성, 이름, 주소 조회
+
+SELECT a.address, c.last_name, c.first_name 
+FROM address a
+INNER JOIN customer c 
+ON c.address_id = a.address_id;
 
 
 
