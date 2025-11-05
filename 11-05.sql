@@ -167,4 +167,179 @@ WHERE emp_no IN (SELECT emp_no
                  WHERE salary BETWEEN 100 AND 1000
 					  );
 
+-- const
+EXPLAIN 
+SELECT *
+FROM employees 
+WHERE emp_no = 10001;
+ 
+-- const
+EXPLAIN 
+SELECT *
+FROM dept_emp
+WHERE dept_no = 'd005'
+AND emp_no = 10001;
+   
+   
+-- const
+EXPLAIN
+SELECT COUNT(1)
+FROM employees e1
+WHERE first_name = ( SELECT first_name 
+							FROM employees e2
+							WHERE emp_no = 100001 );
+                       
+-- ALL               
+EXPLAIN
+SELECT COUNT(1)
+FROM employees e1
+WHERE first_name = 'Jasminko';
+  
+-- eq_ref 실행계획
+EXPLAIN 
+SELECT e.emp_no, t.title
+FROM employees e
+INNER JOIN titles t
+ON e.emp_no = t.emp_no
+WHERE e.emp_no BETWEEN 10001 AND 10100;
+
+-- ref 실행계획
+EXPLAIN 
+SELECT STRAIGHT_JOIN e.emp_no, t.title
+FROM employees e
+INNER JOIN titles t
+ON e.emp_no = t.emp_no
+WHERE e.emp_no BETWEEN 10001 AND 10100;
+
+
+EXPLAIN 
+SELECT *
+FROM titles
+WHERE emp_no = 10001;
+
+
+EXPLAIN 
+SELECT *
+FROM titles
+WHERE emp_no = 10001
+AND title = 'Senior Engineer';
+
+EXPLAIN 
+SELECT *
+FROM titles
+WHERE emp_no = 10001
+AND title = 'Senior Engineer'
+AND from_date = '1986-06-26';
+
+
+
+-- 만약 titles 테이블의 to_date 컬럼에 
+-- 인덱스가 없다면 아래 쿼리로 생성
+CREATE INDEX idx_titles_todate
+ON titles(to_date);
+    
+-- ref_or_null
+EXPLAIN
+SELECT *
+FROM titles 
+WHERE to_date = '1985-03-01'
+OR to_date IS NULL;
+
+
+EXPLAIN 
+SELECT *
+FROM titles
+WHERE to_date = '1985-03-01';
+
+-- idx_titles_todate 인덱스를 삭제하고 싶다면
+ALTER TABLE titles
+DROP INDEX IDX_TITLES_TODATE;
+
+
+-- NULL 허용 컬럼에 유니크 인덱스를 생성
+CREATE TABLE unique_null_test (
+    id INT PRIMARY KEY AUTO_INCREMENT
+  , nm VARCHAR(10) UNIQUE NULL
+);
+
+-- nm 값이 있는 Row Insert
+INSERT INTO unique_null_test
+SET nm = 'aaa';
+
+-- nm이 NULL인 Row Insert 2번
+INSERT INTO unique_null_test
+SET nm = NULL;
+
+INSERT INTO unique_null_test
+SET nm = NULL;
+
+SELECT * FROM unique_null_test;
+
+EXPLAIN
+SELECT id
+FROM unique_null_test
+WHERE nm IS NULL OR nm = 'aaa';
+
+SELECT id
+FROM unique_null_test
+WHERE nm = 'aaa';
+
+EXPLAIN
+SELECT *
+FROM employees
+WHERE emp_no BETWEEN 10001 AND 100000;
+
+EXPLAIN
+SELECT *
+FROM employees
+WHERE hire_date BETWEEN '1987-10-01' AND '1987-11-11';
+
+-- 테이블 추가
+CREATE TABLE employee_name (
+	  emp_no INT NOT NULL
+	, first_name VARCHAR(14) NOT NULL
+	, last_name VARCHAR(16) NOT NULL 
+	, PRIMARY KEY (emp_no)
+	, FULLTEXT KEY fx_name(first_name, last_name) WITH PARSER ngram
+);
+
+
+-- 테이블에 레코드 추가
+INSERT INTO employee_name
+(emp_no, first_name, last_name)
+SELECT emp_no, first_name, last_name
+FROM employees;
+
+-- MATCH - AGAINST 명령어를 이용
+-- 조회시간: 36.8ms
+SELECT *
+FROM employee_name
+WHERE MATCH(first_name, last_name) 
+AGAINST ('Facello' IN BOOLEAN MODE);
+
+-- 조회시간: 141ms
+SELECT *
+FROM employee_name
+WHERE first_name LIKE '%Facello%' 
+OR last_name LIKE '%Facello%';
+
+EXPLAIN
+SELECT emp_no
+FROM titles
+WHERE title = 'Manager';
+
+
+-- 사원번호가 1100으로 시작하면서 사원번호가 5자리인 사원의 정보를 모두 조회
+
+SET profiling = 0;
+
+SELECT @@profiling;
+
+SHOW profiles;
+
+SELECT *
+FROM employees
+WHERE emp_no BETWEEN 11000 AND 11009;
+
+
 
