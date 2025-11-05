@@ -359,3 +359,5 @@ EXPLAIN
 SELECT COUNT(1)
 FROM salaries
 WHERE use_yn = '1';
+
+
