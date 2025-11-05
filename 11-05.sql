@@ -335,11 +335,28 @@ SET profiling = 0;
 
 SELECT @@profiling;
 
-SHOW profiles;
+SHOW PROFILES;
 
+EXPLAIN
 SELECT *
 FROM employees
 WHERE emp_no BETWEEN 11000 AND 11009;
 
+EXPLAIN
+SELECT *
+FROM employees
+WHERE SUBSTRING(emp_no, 1, 4) = 1100
+AND LENGTH(emp_no) = 5;
 
+-- 성별 기준으로 몇 명의 사원이 있는지 출력하는 쿼리
+EXPLAIN
+SELECT gender, COUNT(gender)
+FROM employees
+GROUP BY gender;
+
+-- 사용여부 use_yn값이 1인 데이터의 row 수
+EXPLAIN
+SELECT COUNT(1)
+FROM salaries
+WHERE use_yn = '1';
 
