@@ -169,11 +169,12 @@ FROM employees e
                     ON s.emp_no = e.emp_no;
 
 # 필요 이상으로 많은 정보를 가져오는 나쁜 SQL문
-SELECT count(s.emp_no) as cnt
-from (SELECT e.emp_no, dm.dept_no
-      FROM (SELECT * FROM employees
-                     WHERE gender = 'M'
-                     AND emp_no > 300000) e
+SELECT COUNT(s.emp_no) AS cnt
+FROM (SELECT e.emp_no, dm.dept_no
+      FROM (SELECT *
+            FROM employees
+            WHERE gender = 'M'
+              AND emp_no > 300000) e
                LEFT JOIN dept_manager dm
                          ON dm.emp_no = e.emp_no) s;
 
@@ -184,18 +185,28 @@ FROM (SELECT e.emp_no
             WHERE gender = 'M'
               AND emp_no > 300000) e) s;
 
-SELECT count(emp_no) as cnt
+SELECT COUNT(emp_no) AS cnt
 FROM employees FORCE INDEX (`PRIMARY`)
 WHERE gender = 'M'
-AND emp_no > 300000;
+  AND emp_no > 300000;
 
 
 # 대량의 데이터를 가져와 조인하는 나쁜 SQL문
 
 SELECT DISTINCT de.dept_no
 FROM dept_manager dm
-INNER JOIN dept_emp de
-ON de.dept_no = dm.dept_no
+         INNER JOIN dept_emp de
+                    ON de.dept_no = dm.dept_no
 ORDER BY de.dept_no;
 
-SELECT DISTINCT dept_no FROM dept_manager;
+SELECT DISTINCT dept_no
+FROM dept_manager;
+
+# 책 result
+
+SELECT de.dept_no
+FROM (SELECT DISTINCT dept_no FROM dept_emp) de
+WHERE EXISTS (SELECT 1
+              FROM dept_manager dm
+              WHERE de.dept_no = dm.dept_no)
+ORDER BY de.dept_no;
