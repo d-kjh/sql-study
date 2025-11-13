@@ -1,0 +1,3 @@
+show variables like '%event%'
+
+
