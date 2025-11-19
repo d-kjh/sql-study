@@ -22,3 +22,4 @@ CREATE EVENT delete_test_rows
 SELECT *
 FROM test_delete;
 
+DROP EVENT delete_test_rows;

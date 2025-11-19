@@ -266,3 +266,7 @@ WHERE coupon_id = 2;
 SELECT *
 FROM coupon
 WHERE coupon_id = 2;
+
+
+DROP EVENT ev_expire_coupons;
+DROP EVENT ev_membership_daily;
