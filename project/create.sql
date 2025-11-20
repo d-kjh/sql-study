@@ -67,18 +67,17 @@ CREATE TABLE `common_code`
 -- 테이블 coupon
 CREATE TABLE `coupon`
 (
-    `coupon_id`           BIGINT       NOT NULL AUTO_INCREMENT COMMENT '쿠폰 ID',
-    `coupon_code`         VARCHAR(7)   NOT NULL COMMENT '쿠폰 분류 코드',
-    `coupon_name`         VARCHAR(50)  NOT NULL,
-    `comment`             VARCHAR(200) NOT NULL,
-    `min_price`           DECIMAL(10, 2)        DEFAULT '0',
-    `discount_amount`     DECIMAL(10, 2)        DEFAULT NULL COMMENT '할인금액이 값이 있을 시 할인율엔 값이 없어야 한다',
-    `discount_rate`       TINYINT               DEFAULT NULL COMMENT '할인율에 값이 있을시 할인금액에는 값이 없어야 한다',
-    `max_discount_amount` DECIMAL(10, 2)        DEFAULT NULL COMMENT '할인율에 값이 있을시 반드시 값이 있어야한다',
-    `start_date`          DATETIME     NOT NULL,
-    `end_date`            DATETIME              DEFAULT NULL,
-    `valid_day`           INT          NOT NULL COMMENT '기본 일수 30',
-    `is_active`           TINYINT(1)   NOT NULL DEFAULT '0' COMMENT '0: 사용, 1: 미사용',
+    `coupon_id`           BIGINT         NOT NULL AUTO_INCREMENT COMMENT '쿠폰 ID',
+    `coupon_code`         VARCHAR(7)     NOT NULL COMMENT '쿠폰 분류 코드',
+    `coupon_name`         VARCHAR(50)    NOT NULL COMMENT '쿠폰 이름',
+    `comment`             VARCHAR(200)   NOT NULL COMMENT '쿠폰 설명',
+    `min_price`           DECIMAL(10, 2) NOT NULL DEFAULT 0.00 COMMENT '최소 사용 가능 금액',
+    `discount_type`       TINYINT                 DEFAULT 0 COMMENT '0: 할인 금액, 1: 할인율',
+    `discount_value`      DECIMAL(10, 2)          DEFAULT NULL COMMENT '할인값',
+    `max_discount_amount` DECIMAL(10, 2)          DEFAULT NULL COMMENT '할인 분류가 1일시 값 필요',
+    `valid_day`           INT            NOT NULL DEFAULT 30 COMMENT '발급 후 유효기간(일수)',
+    fixed_expire_date     DATE           NULL COMMENT '고정 만료일 (이 값이 있으면 이 날짜로 만료)',
+    `is_active`           TINYINT(1)     NOT NULL DEFAULT 1 COMMENT '0: 비활성, 1: 활성',
     PRIMARY KEY (`coupon_id`),
     KEY `FK_coupon_common_code` (`coupon_code`),
     CONSTRAINT `FK_coupon_common_code` FOREIGN KEY (`coupon_code`) REFERENCES `common_code` (`code_id`)
@@ -693,9 +692,9 @@ CREATE TABLE `payment_bank_transfer`
 -- 테이블 payment_mobile
 CREATE TABLE `payment_mobile`
 (
-`payment_id`     BIGINT      NOT NULL COMMENT '결제 ID',
-        `carrier_code`      VARCHAR(7)  NOT NULL COMMENT '통신사 분류 코드',
-    `phone_number` VARCHAR(13) NOT NULL COMMENT '휴대폰 번호',
+    `payment_id`    BIGINT      NOT NULL COMMENT '결제 ID',
+    `carrier_code`  VARCHAR(7)  NOT NULL COMMENT '통신사 분류 코드',
+    `phone_number`  VARCHAR(13) NOT NULL COMMENT '휴대폰 번호',
     `approval_code` VARCHAR(10) NOT NULL COMMENT '결제 승인 번호',
     PRIMARY KEY (payment_id),
     CONSTRAINT `FK_payment_mobile_payment` FOREIGN KEY (payment_id) REFERENCES `payment` (payment_id),

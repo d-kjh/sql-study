@@ -24,3 +24,6 @@ ADD CONSTRAINT uq_store_item_code_item_name UNIQUE (store_item_code, item_name);
 
 ALTER TABLE event
 ADD CONSTRAINT uq_event_code_event_title_start_date UNIQUE (event_code, event_title, start_date);
+
+ALTER TABLE user
+ADD CONSTRAINT uq_card_num UNIQUE (card_num);
