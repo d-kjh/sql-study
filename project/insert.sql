@@ -34,7 +34,31 @@ VALUES (3, 2),
        (5, 4),
        (6, 5);
 
-INSERT INTO
+INSERT INTO screen_type
+    (screen_type, price)
+VALUES ('00101', 15000),
+       ('00102', 18000),
+       ('00103', 35000),
+       ('00104', 17000);
+
+insert into screen_time
+    (screen_time, start_time, end_time, adjust_price)
+VALUES ('00301', '06:00:00', '10:59:59', 3000),
+       ('00302', '11:00:00', '22:59:59', 0),
+       ('00303', '23:00:00', '02:59:59', 4000);
+
+insert into screen_type
+(screen_type, price)
+VALUES ('00201', 0),
+       ('00202', 2000),
+       ('00203', 6000),
+       ('00204', 6000);
+
+insert into admin
+(name)
+VALUES
+    ('김나현'),('김주현'),('서하빈'),('윤소연');
+
 
 
 
