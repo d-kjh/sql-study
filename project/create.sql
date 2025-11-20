@@ -17,10 +17,13 @@ DROP TABLE IF EXISTS
     screen_type,
     employee,
     `user`,
-    payment_discount,
+    payment_discount,reservation_countreservation_count
+    payment_method,
     store_item,
     `order`,
     ticket_discount,
+    theater,
+    theater_movie,
     screen_schedule,
     membership_tier,
     movie,
@@ -129,7 +132,7 @@ CREATE TABLE `payment_method`
     `payment_method_id` BIGINT     NOT NULL AUTO_INCREMENT COMMENT '결제 수단 ID',
     `method_type`       VARCHAR(7) NOT NULL COMMENT '결제 수단 분류 코드',
     PRIMARY KEY (`payment_method_id`),
-    CONSTRAINT `FK_user_common_code` FOREIGN KEY (`method_type`) REFERENCES `common_code` (`code_id`)
+    CONSTRAINT `FK_user_common_code_1` FOREIGN KEY (`method_type`) REFERENCES `common_code` (`code_id`)
 );
 
 -- 테이블 movie
@@ -521,7 +524,7 @@ CREATE TABLE `membership_coupon_rule`
 CREATE TABLE `payment_discount`
 (
     `payment_id`     BIGINT         NOT NULL COMMENT '결제 ID',
-    `policy_id`      BIGINT                  DEFAULT NULL COMMENT '할인 정책 ID',
+    `policy_id`      BIGINT         NOT NULL COMMENT '할인 정책 ID',
     `applied_amount` DECIMAL(10, 2) NOT NULL COMMENT '결제 단계에서 할인 된 금액',
     `created_at`     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (`payment_id`, `policy_id`),
