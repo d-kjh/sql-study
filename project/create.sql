@@ -66,10 +66,10 @@ CREATE TABLE IF NOT EXISTS `coupon`
     `coupon_code`         VARCHAR(7)   NOT NULL COMMENT '쿠폰 분류 코드',
     `coupon_name`         VARCHAR(50)  NOT NULL,
     `comment`             VARCHAR(200) NOT NULL,
-    `min_price`           INT                   DEFAULT '0',
-    `discount_amount`     INT                   DEFAULT NULL COMMENT '할인금액이 값이 있을 시 할인율엔 값이 없어야 한다',
+    `min_price`           DECIMAL(10, 2)        DEFAULT '0',
+    `discount_amount`     DECIMAL(10, 2)        DEFAULT NULL COMMENT '할인금액이 값이 있을 시 할인율엔 값이 없어야 한다',
     `discount_rate`       TINYINT               DEFAULT NULL COMMENT '할인율에 값이 있을시 할인금액에는 값이 없어야 한다',
-    `max_discount_amount` INT                   DEFAULT NULL COMMENT '할인율에 값이 있을시 반드시 값이 있어야한다',
+    `max_discount_amount` DECIMAL(10, 2)        DEFAULT NULL COMMENT '할인율에 값이 있을시 반드시 값이 있어야한다',
     `start_date`          DATETIME     NOT NULL,
     `end_date`            DATETIME              DEFAULT NULL,
     `valid_day`           INT          NOT NULL COMMENT '기본 일수 30',
@@ -82,8 +82,8 @@ CREATE TABLE IF NOT EXISTS `coupon`
 -- 테이블 age_type 구조 내보내기
 CREATE TABLE IF NOT EXISTS `age_type`
 (
-    `age_type`     VARCHAR(7) NOT NULL COMMENT '연령 분류 코드(성인, 청소년, 경로, 우대)',
-    `adjust_price` INT        NOT NULL COMMENT '가감 가격',
+    `age_type`     VARCHAR(7)     NOT NULL COMMENT '연령 분류 코드(성인, 청소년, 경로, 우대)',
+    `adjust_price` DECIMAL(10, 2) NOT NULL COMMENT '가감 가격',
     KEY `FK_common_code_TO_age_type_1` (`age_type`),
     CONSTRAINT `FK_common_code_TO_age_type_1` FOREIGN KEY (`age_type`) REFERENCES `common_code` (`code_id`)
 );
@@ -91,11 +91,11 @@ CREATE TABLE IF NOT EXISTS `age_type`
 -- 테이블 membership_tier 구조 내보내기
 CREATE TABLE IF NOT EXISTS `membership_tier`
 (
-    `membership_id`     INT        NOT NULL AUTO_INCREMENT COMMENT '맴버십 ID',
-    `membership_code`   VARCHAR(7) NOT NULL COMMENT 'basic, friend, vip, vvip, mvip',
-    `promote_min_point` INT        NOT NULL DEFAULT '0' COMMENT '6000, 12000, 18000, 24000',
-    `sort_order`        TINYINT    NOT NULL COMMENT '1,2,3,4,5',
-    `is_active`         TINYINT    NOT NULL DEFAULT '0' COMMENT '0 : 미사용중 1 : 사용중',
+    `membership_id`     INT            NOT NULL AUTO_INCREMENT COMMENT '맴버십 ID',
+    `membership_code`   VARCHAR(7)     NOT NULL COMMENT 'basic, friend, vip, vvip, mvip',
+    `promote_min_point` DECIMAL(10, 2) NOT NULL DEFAULT '0' COMMENT '6000, 12000, 18000, 24000',
+    `sort_order`        TINYINT        NOT NULL COMMENT '1,2,3,4,5',
+    `is_active`         TINYINT        NOT NULL DEFAULT '0' COMMENT '0 : 미사용중 1 : 사용중',
     PRIMARY KEY (`membership_id`),
     KEY `FK_membership_tier_common_code` (`membership_code`),
     CONSTRAINT `FK_membership_tier_common_code` FOREIGN KEY (`membership_code`) REFERENCES `common_code` (`code_id`)
@@ -176,19 +176,19 @@ CREATE TABLE IF NOT EXISTS `non_user`
 -- 테이블 store_item 구조 내보내기
 CREATE TABLE IF NOT EXISTS `store_item`
 (
-    `store_item_id`   BIGINT       NOT NULL AUTO_INCREMENT COMMENT '스토어 상품 ID',
-    `store_item_code` VARCHAR(7)   NOT NULL COMMENT '상품 분류(영화 관람권, 팝콘/음료/굿즈 교환권, 할인 쿠폰)',
-    `item_name`       VARCHAR(100) NOT NULL COMMENT '상품 이름',
-    `item_desc`       VARCHAR(50)  NOT NULL COMMENT '상품 설명',
-    `item_limit`      INT          NOT NULL DEFAULT '1' COMMENT '1회 최대 구매 가능 수량(기본 수량 1)',
-    `price`           INT          NOT NULL COMMENT '가격',
-    `valid_day`       INT          NOT NULL DEFAULT '90' COMMENT '교환권 사용 유효 기간(기본 일수 90)',
-    `start_date`      DATE         NOT NULL COMMENT '판매 시작일',
-    `end_date`        DATE         NOT NULL COMMENT '판매 종료일',
-    `is_active`       TINYINT      NOT NULL DEFAULT '0' COMMENT '판매 여부(0: 판매중, 1: 판매 종료)',
-    `payment_type`    TINYINT      NOT NULL DEFAULT '0' COMMENT '결제 방식(0: 현금, 1: 포인트)',
-    `created_at`      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성일자',
-    `updated_at`      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정일자',
+    `store_item_id`   BIGINT         NOT NULL AUTO_INCREMENT COMMENT '스토어 상품 ID',
+    `store_item_code` VARCHAR(7)     NOT NULL COMMENT '상품 분류(영화 관람권, 팝콘/음료/굿즈 교환권, 할인 쿠폰)',
+    `item_name`       VARCHAR(100)   NOT NULL COMMENT '상품 이름',
+    `item_desc`       VARCHAR(50)    NOT NULL COMMENT '상품 설명',
+    `item_limit`      INT            NOT NULL DEFAULT '1' COMMENT '1회 최대 구매 가능 수량(기본 수량 1)',
+    `price`           DECIMAL(10, 2) NOT NULL COMMENT '가격',
+    `valid_day`       INT            NOT NULL DEFAULT '90' COMMENT '교환권 사용 유효 기간(기본 일수 90)',
+    `start_date`      DATE           NOT NULL COMMENT '판매 시작일',
+    `end_date`        DATE           NOT NULL COMMENT '판매 종료일',
+    `is_active`       TINYINT        NOT NULL DEFAULT '0' COMMENT '판매 여부(0: 판매중, 1: 판매 종료)',
+    `payment_type`    TINYINT        NOT NULL DEFAULT '0' COMMENT '결제 방식(0: 현금, 1: 포인트)',
+    `created_at`      DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성일자',
+    `updated_at`      DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정일자',
     PRIMARY KEY (`store_item_id`),
     KEY `FK_store_item_common_code` (`store_item_code`),
     CONSTRAINT `FK_store_item_common_code` FOREIGN KEY (`store_item_code`) REFERENCES `common_code` (`code_id`)
@@ -208,15 +208,15 @@ CREATE TABLE IF NOT EXISTS `store_coupon`
 -- 테이블 order 구조 내보내기
 CREATE TABLE IF NOT EXISTS `order`
 (
-    `order_id`      BIGINT   NOT NULL AUTO_INCREMENT COMMENT '주문 ID',
-    `user_id`       BIGINT   NOT NULL COMMENT '회원 ID',
-    `store_item_id` BIGINT   NOT NULL COMMENT '스토어 상품 ID',
-    `quantity`      INT      NOT NULL COMMENT '구매 수량',
-    `unit_price`    INT      NOT NULL COMMENT '구매 금액',
-    `price`         INT      NOT NULL COMMENT '총 구매 금액',
-    `status`        TINYINT  NOT NULL DEFAULT '0' COMMENT '주문 상태(0: 주문 완료, 1: 주문 취소)',
-    `created_at`    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성일자',
-    `updated_at`    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정일자',
+    `order_id`      BIGINT         NOT NULL AUTO_INCREMENT COMMENT '주문 ID',
+    `user_id`       BIGINT         NOT NULL COMMENT '회원 ID',
+    `store_item_id` BIGINT         NOT NULL COMMENT '스토어 상품 ID',
+    `quantity`      INT            NOT NULL COMMENT '구매 수량',
+    `unit_price`    DECIMAL(10, 2) NOT NULL COMMENT '구매 금액',
+    `price`         DECIMAL(10, 2) NOT NULL COMMENT '총 구매 금액',
+    `status`        TINYINT        NOT NULL DEFAULT '0' COMMENT '주문 상태(0: 주문 완료, 1: 주문 취소)',
+    `created_at`    DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성일자',
+    `updated_at`    DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정일자',
     PRIMARY KEY (`order_id`),
     KEY `FK_order_user` (`user_id`),
     KEY `FK_order_store_item` (`store_item_id`),
@@ -247,8 +247,8 @@ CREATE TABLE IF NOT EXISTS `employee`
 -- 테이블 screen_type 구조 내보내기
 CREATE TABLE IF NOT EXISTS `screen_type`
 (
-    `screen_type` VARCHAR(7) NOT NULL COMMENT '상영관 분류 코드(2D, 4D, 리클라이너, 돌비)',
-    `price`       INT        NOT NULL COMMENT '가격',
+    `screen_type` VARCHAR(7)     NOT NULL COMMENT '상영관 분류 코드(2D, 4D, 리클라이너, 돌비)',
+    `price`       DECIMAL(10, 2) NOT NULL COMMENT '가격',
     KEY `FK_common_code_TO_screen_type_1` (`screen_type`),
     CONSTRAINT `FK_common_code_TO_screen_type_1` FOREIGN KEY (`screen_type`) REFERENCES `common_code` (`code_id`)
 );
@@ -273,10 +273,10 @@ CREATE TABLE IF NOT EXISTS `screen`
 -- 테이블 screen_time 구조 내보내기
 CREATE TABLE IF NOT EXISTS `screen_time`
 (
-    `screen_time`  VARCHAR(7) NOT NULL COMMENT '상영 시간 분류 코드(조조, 일반, 심야)',
-    `start_time`   TIME       NOT NULL COMMENT '시작 시간(09:00:00, 10:00:00, 23:00:00)',
-    `end_time`     TIME       NOT NULL COMMENT '종료 시간(10:59:59, 22:59:59, 02:59:59)',
-    `adjust_price` INT        NOT NULL COMMENT '가감 가격',
+    `screen_time`  VARCHAR(7)     NOT NULL COMMENT '상영 시간 분류 코드(조조, 일반, 심야)',
+    `start_time`   TIME           NOT NULL COMMENT '시작 시간(09:00:00, 10:00:00, 23:00:00)',
+    `end_time`     TIME           NOT NULL COMMENT '종료 시간(10:59:59, 22:59:59, 02:59:59)',
+    `adjust_price` DECIMAL(10, 2) NOT NULL COMMENT '가감 가격',
     KEY `FK_common_code_TO_screen_time_1` (`screen_time`),
     CONSTRAINT `FK_common_code_TO_screen_time_1` FOREIGN KEY (`screen_time`) REFERENCES `common_code` (`code_id`)
 );
@@ -284,17 +284,17 @@ CREATE TABLE IF NOT EXISTS `screen_time`
 -- 테이블 screen_schedule 구조 내보내기
 CREATE TABLE IF NOT EXISTS `screen_schedule`
 (
-    `schedule_id`  BIGINT   NOT NULL AUTO_INCREMENT COMMENT '상영 일정 ID',
-    `screen_id`    BIGINT   NOT NULL COMMENT '상영관 ID',
-    `movie_id`     BIGINT   NOT NULL COMMENT '영화 ID',
-    `employee_id`  BIGINT   NOT NULL COMMENT '직원(매니저) ID',
-    `running_date` DATE     NOT NULL COMMENT '상영일',
-    `start_time`   TIME     NOT NULL COMMENT '상영 시작 시간',
-    `end_time`     TIME     NOT NULL COMMENT '상영 종료 시간',
-    `price`        INT      NOT NULL COMMENT '가격',
-    `is_delete`    TINYINT  NOT NULL DEFAULT '0' COMMENT '삭제 여부(0: 삭제안됨, 1: 삭제됨)',
-    `created_at`   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성일자',
-    `updated_at`   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정일자',
+    `schedule_id`  BIGINT         NOT NULL AUTO_INCREMENT COMMENT '상영 일정 ID',
+    `screen_id`    BIGINT         NOT NULL COMMENT '상영관 ID',
+    `movie_id`     BIGINT         NOT NULL COMMENT '영화 ID',
+    `employee_id`  BIGINT         NOT NULL COMMENT '직원(매니저) ID',
+    `running_date` DATE           NOT NULL COMMENT '상영일',
+    `start_time`   TIME           NOT NULL COMMENT '상영 시작 시간',
+    `end_time`     TIME           NOT NULL COMMENT '상영 종료 시간',
+    `price`        DECIMAL(10, 2) NOT NULL COMMENT '가격',
+    `is_delete`    TINYINT        NOT NULL DEFAULT '0' COMMENT '삭제 여부(0: 삭제안됨, 1: 삭제됨)',
+    `created_at`   DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성일자',
+    `updated_at`   DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정일자',
     PRIMARY KEY (`schedule_id`),
     KEY `FK_screen_schedule_screen` (`screen_id`),
     KEY `FK_screen_schedule_movie` (`movie_id`),
@@ -307,17 +307,17 @@ CREATE TABLE IF NOT EXISTS `screen_schedule`
 -- 테이블 reservation 구조 내보내기
 CREATE TABLE IF NOT EXISTS `reservation`
 (
-    `reservation_id` BIGINT      NOT NULL AUTO_INCREMENT COMMENT '예매 ID',
-    `schedule_id`    BIGINT      NOT NULL COMMENT '상영 일정 ID',
-    `user_id`        BIGINT               DEFAULT NULL COMMENT '회원 ID',
-    `non_user_id`    BIGINT               DEFAULT NULL COMMENT '비회원 ID',
-    `buyer_name`     VARCHAR(10) NOT NULL COMMENT 'user, non_user 이름',
-    `buyer_phone`    VARCHAR(13) NOT NULL COMMENT 'user, non_user 전화번호',
-    `buyer_birth`    VARCHAR(6)  NOT NULL COMMENT 'user, non_user 생년월일',
-    `price`          INT         NOT NULL COMMENT '예매 가격',
-    `status`         TINYINT     NOT NULL DEFAULT '0' COMMENT '예매 상태 구분(0: 결제중, 1: 완료, 2: 취소)',
-    `created_at`     DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성일자',
-    `updated_at`     DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정일자',
+    `reservation_id` BIGINT         NOT NULL AUTO_INCREMENT COMMENT '예매 ID',
+    `schedule_id`    BIGINT         NOT NULL COMMENT '상영 일정 ID',
+    `user_id`        BIGINT                  DEFAULT NULL COMMENT '회원 ID',
+    `non_user_id`    BIGINT                  DEFAULT NULL COMMENT '비회원 ID',
+    `buyer_name`     VARCHAR(10)    NOT NULL COMMENT 'user, non_user 이름',
+    `buyer_phone`    VARCHAR(13)    NOT NULL COMMENT 'user, non_user 전화번호',
+    `buyer_birth`    VARCHAR(6)     NOT NULL COMMENT 'user, non_user 생년월일',
+    `price`          DECIMAL(10, 2) NOT NULL COMMENT '예매 가격',
+    `status`         TINYINT        NOT NULL DEFAULT '0' COMMENT '예매 상태 구분(0: 결제중, 1: 완료, 2: 취소)',
+    `created_at`     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성일자',
+    `updated_at`     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정일자',
     PRIMARY KEY (`reservation_id`),
     KEY `FK_reservation_screen_schedule` (`schedule_id`),
     KEY `FK_reservation_user` (`user_id`),
@@ -330,17 +330,17 @@ CREATE TABLE IF NOT EXISTS `reservation`
 -- 테이블 payment 구조 내보내기
 CREATE TABLE IF NOT EXISTS `payment`
 (
-    `payment_id`     BIGINT   NOT NULL AUTO_INCREMENT COMMENT '결제 ID',
-    `reservation_id` BIGINT            DEFAULT NULL COMMENT '예매 ID',
-    `order_id`       BIGINT            DEFAULT NULL COMMENT '주문 ID',
-    `origin_amount`  INT      NOT NULL COMMENT '할인 전 금액(정가)',
-    `discount_total` INT      NOT NULL DEFAULT '0' COMMENT '할인 된 금액 합계',
-    `amount`         INT      NOT NULL COMMENT '실제 결제금액',
-    `status`         TINYINT  NOT NULL DEFAULT '0' COMMENT '결제 상태 구분 (0: 결제대기, 1: 완료, 2: 취소, 3: 환불)',
-    `created_at`     DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '결제 생성 일시 - 예매 시도 시점',
-    `completed_at`   DATETIME          DEFAULT NULL COMMENT '실제 결제 완료 시점',
-    `updated_at`     DATETIME          DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '상태 변경 시점',
-    `canceled_at`    DATETIME          DEFAULT NULL COMMENT '취소 환불 완료 시점',
+    `payment_id`     BIGINT         NOT NULL AUTO_INCREMENT COMMENT '결제 ID',
+    `reservation_id` BIGINT                  DEFAULT NULL COMMENT '예매 ID',
+    `order_id`       BIGINT                  DEFAULT NULL COMMENT '주문 ID',
+    `origin_amount`  DECIMAL(10, 2) NOT NULL COMMENT '할인 전 금액(정가)',
+    `discount_total` DECIMAL(10, 2) NOT NULL DEFAULT '0' COMMENT '할인 된 금액 합계',
+    `amount`         DECIMAL(10, 2) NOT NULL COMMENT '실제 결제금액',
+    `status`         TINYINT        NOT NULL DEFAULT '0' COMMENT '결제 상태 구분 (0: 결제대기, 1: 완료, 2: 취소, 3: 환불)',
+    `created_at`     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '결제 생성 일시 - 예매 시도 시점',
+    `completed_at`   DATETIME                DEFAULT NULL COMMENT '실제 결제 완료 시점',
+    `updated_at`     DATETIME                DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '상태 변경 시점',
+    `canceled_at`    DATETIME                DEFAULT NULL COMMENT '취소 환불 완료 시점',
     PRIMARY KEY (`payment_id`),
     KEY `FK_payment_reservation` (`reservation_id`),
     KEY `FK_payment_order` (`order_id`),
@@ -368,10 +368,10 @@ CREATE TABLE IF NOT EXISTS `event`
 -- 테이블 point 구조 내보내기
 CREATE TABLE IF NOT EXISTS `point`
 (
-    `point_id` BIGINT      NOT NULL AUTO_INCREMENT COMMENT '포인트 ID',
-    `user_id`  BIGINT      NOT NULL COMMENT '회원 ID',
-    `value`    INT         NOT NULL DEFAULT '0',
-    `card_num` VARCHAR(16) NOT NULL,
+    `point_id` BIGINT         NOT NULL AUTO_INCREMENT COMMENT '포인트 ID',
+    `user_id`  BIGINT         NOT NULL COMMENT '회원 ID',
+    `value`    DECIMAL(10, 2) NOT NULL DEFAULT '0',
+    `card_num` VARCHAR(16)    NOT NULL,
     PRIMARY KEY (`point_id`),
     KEY `FK_point_user` (`user_id`),
     CONSTRAINT `FK_point_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`)
@@ -380,13 +380,13 @@ CREATE TABLE IF NOT EXISTS `point`
 -- 테이블 point_log 구조 내보내기
 CREATE TABLE IF NOT EXISTS `point_log`
 (
-    `point_history_id` BIGINT   NOT NULL AUTO_INCREMENT COMMENT '포인트 히스토리 ID',
-    `point_id`         BIGINT   NOT NULL COMMENT '포인트 ID, unique',
-    `payment_id`       BIGINT   NOT NULL COMMENT '결제 ID,  unique',
-    `change_amount`    INT      NOT NULL,
-    `balance_after`    INT               DEFAULT NULL COMMENT '변경 포인트 계산 후 총 포인트',
-    `created_at`       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `status`           TINYINT  NOT NULL DEFAULT '0' COMMENT '0: 적립, 1: 차감, 2: 소멸',
+    `point_history_id` BIGINT         NOT NULL AUTO_INCREMENT COMMENT '포인트 히스토리 ID',
+    `point_id`         BIGINT         NOT NULL COMMENT '포인트 ID, unique',
+    `payment_id`       BIGINT         NOT NULL COMMENT '결제 ID,  unique',
+    `change_amount`    DECIMAL(10, 2) NOT NULL,
+    `balance_after`    DECIMAL(10, 2)          DEFAULT NULL COMMENT '변경 포인트 계산 후 총 포인트',
+    `created_at`       DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `status`           TINYINT        NOT NULL DEFAULT '0' COMMENT '0: 적립, 1: 차감, 2: 소멸',
     PRIMARY KEY (`point_history_id`),
     KEY `FK_point_log_point` (`point_id`),
     KEY `FK_point_log_payment` (`payment_id`),
@@ -445,18 +445,18 @@ CREATE TABLE IF NOT EXISTS `coupon_log`
 -- 테이블 discount_policy 구조 내보내기
 CREATE TABLE IF NOT EXISTS `discount_policy`
 (
-    `policy_id`          BIGINT      NOT NULL AUTO_INCREMENT COMMENT '할인 정책 ID',
-    `admin_id`           BIGINT      NOT NULL COMMENT '관리자 ID',
-    `partner_id`         VARCHAR(7)  NOT NULL COMMENT '공통 코드(카드사)',
-    `name`               VARCHAR(50) NOT NULL COMMENT '정책 이름',
-    `type`               TINYINT     NOT NULL COMMENT '할인 구분',
-    `discount_amount`    INT                  DEFAULT NULL COMMENT '할인 금액',
-    `discount_percent`   INT                  DEFAULT NULL COMMENT '할인율',
-    `min_price`          INT         NOT NULL COMMENT '적용 최소 금액',
-    `max_benefit_amount` INT                  DEFAULT NULL COMMENT '최대 할인 금액',
-    `start_date`         DATE        NOT NULL COMMENT '정책 시작일',
-    `end_date`           DATE        NOT NULL COMMENT '정책 종료일',
-    `created_at`         DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성일자',
+    `policy_id`          BIGINT         NOT NULL AUTO_INCREMENT COMMENT '할인 정책 ID',
+    `admin_id`           BIGINT         NOT NULL COMMENT '관리자 ID',
+    `partner_id`         VARCHAR(7)     NOT NULL COMMENT '공통 코드(카드사)',
+    `name`               VARCHAR(50)    NOT NULL COMMENT '정책 이름',
+    `type`               TINYINT        NOT NULL COMMENT '할인 구분',
+    `discount_amount`    DECIMAL(10, 2)          DEFAULT NULL COMMENT '할인 금액',
+    `discount_percent`   DECIMAL(10, 2)          DEFAULT NULL COMMENT '할인율',
+    `min_price`          DECIMAL(10, 2) NOT NULL COMMENT '적용 최소 금액',
+    `max_benefit_amount` DECIMAL(10, 2)          DEFAULT NULL COMMENT '최대 할인 금액',
+    `start_date`         DATE           NOT NULL COMMENT '정책 시작일',
+    `end_date`           DATE           NOT NULL COMMENT '정책 종료일',
+    `created_at`         DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성일자',
     PRIMARY KEY (`policy_id`),
     KEY `FK_discount_policy_admin` (`admin_id`),
     KEY `FK_discount_policy_common_code` (`partner_id`),
@@ -512,12 +512,12 @@ CREATE TABLE IF NOT EXISTS `membership_coupon_rule`
 -- 테이블 payment_discount 구조 내보내기
 CREATE TABLE IF NOT EXISTS `payment_discount`
 (
-    `payment_discount_id` BIGINT     NOT NULL AUTO_INCREMENT COMMENT '결제 단위 할인 ID',
-    `payment_id`          BIGINT     NOT NULL COMMENT '결제 ID',
-    `benefit_code`        VARCHAR(7) NOT NULL COMMENT '카드',
-    `policy_id`           BIGINT              DEFAULT NULL COMMENT '할인 정책 ID',
-    `applied_amount`      INT        NOT NULL COMMENT '결제 단계에서 할인 된 금액',
-    `created_at`          DATETIME   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `payment_discount_id` BIGINT         NOT NULL AUTO_INCREMENT COMMENT '결제 단위 할인 ID',
+    `payment_id`          BIGINT         NOT NULL COMMENT '결제 ID',
+    `benefit_code`        VARCHAR(7)     NOT NULL COMMENT '카드',
+    `policy_id`           BIGINT                  DEFAULT NULL COMMENT '할인 정책 ID',
+    `applied_amount`      DECIMAL(10, 2) NOT NULL COMMENT '결제 단계에서 할인 된 금액',
+    `created_at`          DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (`payment_discount_id`),
     KEY `FK_payment_discount_payment` (`payment_id`),
     KEY `FK_payment_discount_common_code` (`benefit_code`),
@@ -530,10 +530,10 @@ CREATE TABLE IF NOT EXISTS `payment_discount`
 -- 테이블 reservation_count 구조 내보내기
 CREATE TABLE IF NOT EXISTS `reservation_count`
 (
-    `reservation_id` BIGINT     NOT NULL COMMENT '예매 ID',
-    `age_type`       VARCHAR(7) NOT NULL COMMENT '연령 분류 코드',
-    `count`          INT        NOT NULL COMMENT '인원',
-    `price`          INT        NOT NULL COMMENT '가격',
+    `reservation_id` BIGINT         NOT NULL COMMENT '예매 ID',
+    `age_type`       VARCHAR(7)     NOT NULL COMMENT '연령 분류 코드',
+    `count`          INT            NOT NULL COMMENT '인원',
+    `price`          DECIMAL(10, 2) NOT NULL COMMENT '가격',
     PRIMARY KEY (`reservation_id`, `age_type`) USING BTREE,
     KEY `FK_common_code_TO_reservation_count_1` (`age_type`),
     CONSTRAINT `FK_common_code_TO_reservation_count_1` FOREIGN KEY (`age_type`) REFERENCES `common_code` (`code_id`),
@@ -603,12 +603,12 @@ CREATE TABLE IF NOT EXISTS `review_like`
 -- 테이블 ticket_discount 구조 내보내기
 CREATE TABLE IF NOT EXISTS `ticket_discount`
 (
-    `ticket_discount_id`  BIGINT     NOT NULL AUTO_INCREMENT COMMENT '좌석 단위 할인 ID',
-    `reservation_seat_id` BIGINT     NOT NULL COMMENT '예매 좌석',
-    `benefit_code`        VARCHAR(7) NOT NULL COMMENT '포인트, 쿠폰, 교환권',
-    `benefit_id`          BIGINT     NOT NULL COMMENT '종류에 맞는 pk값',
-    `applied_amount`      INT        NOT NULL COMMENT '이 티켓에서 할인된 금액',
-    `created_at`          DATETIME   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `ticket_discount_id`  BIGINT         NOT NULL AUTO_INCREMENT COMMENT '좌석 단위 할인 ID',
+    `reservation_seat_id` BIGINT         NOT NULL COMMENT '예매 좌석',
+    `benefit_code`        VARCHAR(7)     NOT NULL COMMENT '포인트, 쿠폰, 교환권',
+    `benefit_id`          BIGINT         NOT NULL COMMENT '종류에 맞는 pk값',
+    `applied_amount`      DECIMAL(10, 2) NOT NULL COMMENT '이 티켓에서 할인된 금액',
+    `created_at`          DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (`ticket_discount_id`),
     KEY `FK_ticket_discount_reservation_seat` (`reservation_seat_id`),
     KEY `FK_ticket_discount_common_code` (`benefit_code`),
