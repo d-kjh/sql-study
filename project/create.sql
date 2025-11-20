@@ -82,8 +82,8 @@ CREATE TABLE `age_type`
 (
     `age_type`     VARCHAR(7)     NOT NULL COMMENT '연령 분류 코드(성인, 청소년, 경로, 우대)',
     `adjust_price` DECIMAL(10, 2) NOT NULL COMMENT '가감 가격',
-    KEY `FK_common_code_TO_age_type` (`age_type`),
-    CONSTRAINT `FK_common_code_TO_age_type` FOREIGN KEY (`age_type`) REFERENCES `common_code` (`code_id`)
+    KEY `FK_common_code_TO_age_type_1` (`age_type`),
+    CONSTRAINT `FK_common_code_TO_age_type_1` FOREIGN KEY (`age_type`) REFERENCES `common_code` (`code_id`)
 );
 
 -- 테이블 membership_tier
@@ -195,9 +195,9 @@ CREATE TABLE `store_coupon`
     `store_item_id` BIGINT NOT NULL COMMENT '스토어 상품 ID',
     `coupon_id`     BIGINT NOT NULL COMMENT '쿠폰 ID',
     PRIMARY KEY (`store_item_id`, `coupon_id`),
-    KEY `FK_coupon_TO_store_coupon` (`coupon_id`),
-    CONSTRAINT `FK_coupon_TO_store_coupon` FOREIGN KEY (`coupon_id`) REFERENCES `coupon` (`coupon_id`),
-    CONSTRAINT `FK_store_item_TO_store_coupon` FOREIGN KEY (`store_item_id`) REFERENCES `store_item` (`store_item_id`)
+    KEY `FK_coupon_TO_store_coupon_1` (`coupon_id`),
+    CONSTRAINT `FK_coupon_TO_store_coupon_1` FOREIGN KEY (`coupon_id`) REFERENCES `coupon` (`coupon_id`),
+    CONSTRAINT `FK_store_item_TO_store_coupon_1` FOREIGN KEY (`store_item_id`) REFERENCES `store_item` (`store_item_id`)
 );
 
 -- 테이블 order
@@ -244,8 +244,8 @@ CREATE TABLE `screen_type`
 (
     `screen_type` VARCHAR(7)     NOT NULL COMMENT '상영관 분류 코드(2D, 4D, 리클라이너, 돌비)',
     `price`       DECIMAL(10, 2) NOT NULL COMMENT '가격',
-    KEY `FK_common_code_TO_screen_type` (`screen_type`),
-    CONSTRAINT `FK_common_code_TO_screen_type` FOREIGN KEY (`screen_type`) REFERENCES `common_code` (`code_id`)
+    KEY `FK_common_code_TO_screen_type_1` (`screen_type`),
+    CONSTRAINT `FK_common_code_TO_screen_type_1` FOREIGN KEY (`screen_type`) REFERENCES `common_code` (`code_id`)
 );
 
 -- 테이블 theater
@@ -286,10 +286,10 @@ CREATE TABLE `screen`
 -- 테이블 theater_movie
 CREATE TABLE `theater_movie`
 (
-    `theater_id` BIGINT NOT NULL COMMENT '영화관 ID',
-    `movie_id` BIGINT NOT NULL COMMENT '영화 ID',
+    `theater_id` BIGINT   NOT NULL COMMENT '영화관 ID',
+    `movie_id`   BIGINT   NOT NULL COMMENT '영화 ID',
     `start_date` DATETIME NOT NULL COMMENT '상영 시작 일',
-    `end_date` DATETIME NOT NULL COMMENT '상영 종료 일',
+    `end_date`   DATETIME NOT NULL COMMENT '상영 종료 일',
     PRIMARY KEY (`theater_id`, `movie_id`),
     KEY `FK_theater_movie_movie` (`movie_id`),
     CONSTRAINT `FK_theater_movie_movie` FOREIGN KEY (`movie_id`) REFERENCES `movie` (`movie_id`),
@@ -303,8 +303,8 @@ CREATE TABLE `screen_time`
     `start_time`   TIME           NOT NULL COMMENT '시작 시간(09:00:00, 10:00:00, 23:00:00)',
     `end_time`     TIME           NOT NULL COMMENT '종료 시간(10:59:59, 22:59:59, 02:59:59)',
     `adjust_price` DECIMAL(10, 2) NOT NULL COMMENT '가감 가격',
-    KEY `FK_common_code_TO_screen_time` (`screen_time`),
-    CONSTRAINT `FK_common_code_TO_screen_time` FOREIGN KEY (`screen_time`) REFERENCES `common_code` (`code_id`)
+    KEY `FK_common_code_TO_screen_time_1` (`screen_time`),
+    CONSTRAINT `FK_common_code_TO_screen_time_1` FOREIGN KEY (`screen_time`) REFERENCES `common_code` (`code_id`)
 );
 
 -- 테이블 screen_schedule
@@ -483,10 +483,10 @@ CREATE TABLE `event_part`
     `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성일자',
     `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정일자',
     PRIMARY KEY (`part_id`),
-    KEY `FK_event_TO_event_part` (`event_id`),
-    KEY `FK_user_TO_event_part` (`user_id`),
-    CONSTRAINT `FK_event_TO_event_part` FOREIGN KEY (`event_id`) REFERENCES `event` (`event_id`),
-    CONSTRAINT `FK_user_TO_event_part` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`)
+    KEY `FK_event_TO_event_part_1` (`event_id`),
+    KEY `FK_user_TO_event_part_1` (`user_id`),
+    CONSTRAINT `FK_event_TO_event_part_1` FOREIGN KEY (`event_id`) REFERENCES `event` (`event_id`),
+    CONSTRAINT `FK_user_TO_event_part_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`)
 );
 
 -- 테이블 favorite
@@ -496,9 +496,9 @@ CREATE TABLE `favorite`
     `movie_id`   BIGINT   NOT NULL COMMENT '영화 ID',
     `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (`user_id`, `movie_id`) USING BTREE,
-    KEY `FK_movie_TO_favorite` (`movie_id`),
-    CONSTRAINT `FK_movie_TO_favorite` FOREIGN KEY (`movie_id`) REFERENCES `movie` (`movie_id`),
-    CONSTRAINT `FK_user_TO_favorite` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`)
+    KEY `FK_movie_TO_favorite_1` (`movie_id`),
+    CONSTRAINT `FK_movie_TO_favorite_1` FOREIGN KEY (`movie_id`) REFERENCES `movie` (`movie_id`),
+    CONSTRAINT `FK_user_TO_favorite_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`)
 );
 
 -- 테이블 membership_coupon_rule
@@ -538,9 +538,9 @@ CREATE TABLE `reservation_count`
     `count`          INT            NOT NULL COMMENT '인원',
     `price`          DECIMAL(10, 2) NOT NULL COMMENT '가격',
     PRIMARY KEY (`reservation_id`, `age_type`) USING BTREE,
-    KEY `FK_common_code_TO_reservation_count` (`age_type`),
-    CONSTRAINT `FK_common_code_TO_reservation_count` FOREIGN KEY (`age_type`) REFERENCES `common_code` (`code_id`),
-    CONSTRAINT `FK_reservation_TO_reservation_count` FOREIGN KEY (`reservation_id`) REFERENCES `reservation` (`reservation_id`)
+    KEY `FK_common_code_TO_reservation_count_1` (`age_type`),
+    CONSTRAINT `FK_common_code_TO_reservation_count_1` FOREIGN KEY (`age_type`) REFERENCES `common_code` (`code_id`),
+    CONSTRAINT `FK_reservation_TO_reservation_count_1` FOREIGN KEY (`reservation_id`) REFERENCES `reservation` (`reservation_id`)
 );
 
 -- 테이블 reservation_seat
@@ -563,9 +563,9 @@ CREATE TABLE `reservation_seat_list`
     `reservation_id`      BIGINT NOT NULL COMMENT '예매 ID',
     `reservation_seat_id` BIGINT NOT NULL COMMENT '예매 좌석 ID',
     PRIMARY KEY (`reservation_id`, `reservation_seat_id`),
-    KEY `FK_reservation_seat_TO_reservation_seat_list` (`reservation_seat_id`),
-    CONSTRAINT `FK_reservation_seat_TO_reservation_seat_list` FOREIGN KEY (`reservation_seat_id`) REFERENCES `reservation_seat` (`reservation_seat_id`),
-    CONSTRAINT `FK_reservation_TO_reservation_seat_list` FOREIGN KEY (`reservation_id`) REFERENCES `reservation` (`reservation_id`)
+    KEY `FK_reservation_seat_TO_reservation_seat_list_1` (`reservation_seat_id`),
+    CONSTRAINT `FK_reservation_seat_TO_reservation_seat_list_1` FOREIGN KEY (`reservation_seat_id`) REFERENCES `reservation_seat` (`reservation_seat_id`),
+    CONSTRAINT `FK_reservation_TO_reservation_seat_list_1` FOREIGN KEY (`reservation_id`) REFERENCES `reservation` (`reservation_id`)
 );
 
 
@@ -598,9 +598,9 @@ CREATE TABLE `review_like`
     `user_id`    BIGINT   NOT NULL COMMENT '회원 ID',
     `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성일자',
     PRIMARY KEY (`review_id`, `user_id`),
-    KEY `FK_user_TO_review_like` (`user_id`),
-    CONSTRAINT `FK_review_TO_review_like` FOREIGN KEY (`review_id`) REFERENCES `review` (`review_id`),
-    CONSTRAINT `FK_user_TO_review_like` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`)
+    KEY `FK_user_TO_review_like_1` (`user_id`),
+    CONSTRAINT `FK_review_TO_review_like_1` FOREIGN KEY (`review_id`) REFERENCES `review` (`review_id`),
+    CONSTRAINT `FK_user_TO_review_like_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`)
 );
 
 -- 테이블 ticket_discount
