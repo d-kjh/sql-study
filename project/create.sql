@@ -11,13 +11,15 @@ DROP TABLE IF EXISTS
     reservation,
     coupon,
     reservation_seat_list,
-    favorite,
+    movive_favorite,
+    theater_favorite,
     common_code,
     age_type,
     screen_type,
     employee,
     `user`,
-    payment_discount,reservation_countreservation_count
+    payment_discount,
+    reservation_countreservation_count,
     payment_method,
     store_item,
     `order`,
@@ -39,6 +41,8 @@ DROP TABLE IF EXISTS
     store_coupon,
     screen,
     reservation_count,
+    membership_log,
+    movie_favorite,
     review;
 
 SET FOREIGN_KEY_CHECKS = 1;
@@ -93,7 +97,7 @@ CREATE TABLE `age_type`
 CREATE TABLE `membership_tier`
 (
     `membership_id`     INT            NOT NULL AUTO_INCREMENT COMMENT '맴버십 ID',
-    `membership_code`   VARCHAR(7)     NOT NULL COMMENT 'basic, friend, vip, vvip, mvip',
+    `membership_code`   VARCHAR(7)     NOT NULL COMMENT 'Basic, Friend, VIP, VVIP, MVIP',
     `promote_min_point` DECIMAL(10, 2) NOT NULL DEFAULT '0' COMMENT '6000, 12000, 18000, 24000',
     `sort_order`        TINYINT        NOT NULL COMMENT '1,2,3,4,5',
     `is_active`         TINYINT        NOT NULL DEFAULT '0' COMMENT '0 : 미사용중 1 : 사용중',
@@ -124,15 +128,6 @@ CREATE TABLE `user`
     KEY `FK_user_common_code` (`carrier_code`),
     CONSTRAINT `FK_user_common_code` FOREIGN KEY (`carrier_code`) REFERENCES `common_code` (`code_id`),
     CONSTRAINT `FK_user_membership_tier` FOREIGN KEY (`membership_id`) REFERENCES `membership_tier` (`membership_id`)
-);
-
--- 테이블 payment_method
-CREATE TABLE `payment_method`
-(
-    `payment_method_id` BIGINT     NOT NULL AUTO_INCREMENT COMMENT '결제 수단 ID',
-    `method_type`       VARCHAR(7) NOT NULL COMMENT '결제 수단 분류 코드',
-    PRIMARY KEY (`payment_method_id`),
-    CONSTRAINT `FK_user_common_code_1` FOREIGN KEY (`method_type`) REFERENCES `common_code` (`code_id`)
 );
 
 -- 테이블 movie
@@ -226,7 +221,7 @@ CREATE TABLE `order`
 CREATE TABLE `employee`
 (
     `employee_id` BIGINT      NOT NULL AUTO_INCREMENT COMMENT '직원 ID',
-    `theater`     VARCHAR(7)  NOT NULL COMMENT '지점 분류 코드',
+    `theater_id`  VARCHAR(7)  NOT NULL COMMENT '지점 분류 코드',
     `admin_id`    BIGINT      NOT NULL COMMENT '관리자 ID',
     `name`        VARCHAR(20) NOT NULL COMMENT '이름(unique)',
     `phone`       VARCHAR(13) NOT NULL COMMENT '전화번호(unique)',
@@ -235,10 +230,10 @@ CREATE TABLE `employee`
     `created_at`  DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성일자',
     `updated_at`  DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정일자',
     PRIMARY KEY (`employee_id`),
-    KEY `FK_employee_common_code` (`theater`),
+    KEY `FK_employee_common_code` (`theater_id`),
     KEY `FK_employee_admin` (`admin_id`),
     CONSTRAINT `FK_employee_admin` FOREIGN KEY (`admin_id`) REFERENCES `admin` (`admin_id`),
-    CONSTRAINT `FK_employee_common_code` FOREIGN KEY (`theater`) REFERENCES `common_code` (`code_id`)
+    CONSTRAINT `FK_employee_common_code` FOREIGN KEY (`theater_id`) REFERENCES `common_code` (`code_id`)
 );
 
 -- screen
@@ -267,6 +262,16 @@ CREATE TABLE `theater`
     KEY `FK_theater_admin` (`admin_id`),
     CONSTRAINT `FK_theater_common_code` FOREIGN KEY (`region`) REFERENCES `common_code` (`code_id`),
     CONSTRAINT `FK_theater_admin` FOREIGN KEY (admin_id) REFERENCES `admin` (admin_id)
+);
+
+CREATE TABLE theater_favorite
+(
+    user_id    BIGINT   NOT NULL COMMENT '회원 ID',
+    theater_id BIGINT   NOT NULL COMMENT '영화 ID',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성일자',
+    CONSTRAINT pk_theater_favorite PRIMARY KEY (user_id, theater_id),
+    CONSTRAINT fk_favorite_user FOREIGN KEY (user_id) REFERENCES user (user_id),
+    CONSTRAINT fk_favorite_theater FOREIGN KEY (theater_id) REFERENCES theater (theater_id)
 );
 
 -- 테이블 screen
@@ -391,14 +396,14 @@ CREATE TABLE `event`
 -- 테이블 point_log
 CREATE TABLE `point_log`
 (
-    `point_history_id` BIGINT         NOT NULL AUTO_INCREMENT COMMENT '포인트 히스토리 ID',
-    `user_id`          BIGINT         NOT NULL COMMENT '회원 ID',
-    `payment_id`       BIGINT         NOT NULL COMMENT '결제 ID',
-    `change_amount`    DECIMAL(10, 2) NOT NULL,
-    `balance_after`    DECIMAL(10, 2)          DEFAULT NULL COMMENT '변경 포인트 계산 후 총 포인트',
-    `created_at`       DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `status`           TINYINT        NOT NULL DEFAULT '0' COMMENT '0: 적립, 1: 차감, 2: 소멸',
-    PRIMARY KEY (`point_history_id`),
+    `point_log_id`  BIGINT         NOT NULL AUTO_INCREMENT COMMENT '포인트 내역 ID',
+    `user_id`       BIGINT         NOT NULL COMMENT '회원 ID',
+    `payment_id`    BIGINT         NOT NULL COMMENT '결제 ID',
+    `change_amount` DECIMAL(10, 2) NOT NULL,
+    `balance_after` DECIMAL(10, 2)          DEFAULT NULL COMMENT '변경 포인트 계산 후 총 포인트',
+    `created_at`    DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `status`        TINYINT        NOT NULL DEFAULT '0' COMMENT '0: 적립, 1: 차감, 2: 소멸',
+    PRIMARY KEY (`point_log_id`),
     KEY `FK_point_log_user` (`user_id`),
     KEY `FK_point_log_payment` (`payment_id`),
     CONSTRAINT `FK_point_log_payment` FOREIGN KEY (`payment_id`) REFERENCES `payment` (`payment_id`),
@@ -442,11 +447,11 @@ CREATE TABLE `coupon_detail`
 -- 테이블 coupon_log
 CREATE TABLE `coupon_log`
 (
-    `coupon_history` BIGINT   NOT NULL AUTO_INCREMENT COMMENT '쿠폰 히스토리 ID',
+    `coupon_log_id`  BIGINT   NOT NULL AUTO_INCREMENT COMMENT '쿠폰 내역 ID',
     `user_coupon_id` BIGINT   NOT NULL COMMENT '쿠폰 소유 ID',
     `payment_id`     BIGINT   NOT NULL COMMENT '결제 ID',
     `use_date`       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (`coupon_history`),
+    PRIMARY KEY (`coupon_log_id`),
     KEY `FK_coupon_log_coupon_detail` (`user_coupon_id`),
     KEY `FK_coupon_log_payment` (`payment_id`),
     CONSTRAINT `FK_coupon_log_coupon_detail` FOREIGN KEY (`user_coupon_id`) REFERENCES `coupon_detail` (`user_coupon_id`),
@@ -492,13 +497,13 @@ CREATE TABLE `event_part`
     CONSTRAINT `FK_user_TO_event_part_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`)
 );
 
--- 테이블 favorite
-CREATE TABLE `favorite`
+-- 테이블 movie_favorite
+CREATE TABLE `movie_favorite`
 (
     `user_id`    BIGINT   NOT NULL COMMENT '회원 ID',
     `movie_id`   BIGINT   NOT NULL COMMENT '영화 ID',
     `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (`user_id`, `movie_id`) USING BTREE,
+    PRIMARY KEY (`user_id`, `movie_id`),
     KEY `FK_movie_TO_favorite_1` (`movie_id`),
     CONSTRAINT `FK_movie_TO_favorite_1` FOREIGN KEY (`movie_id`) REFERENCES `movie` (`movie_id`),
     CONSTRAINT `FK_user_TO_favorite_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`)
@@ -540,7 +545,7 @@ CREATE TABLE `reservation_count`
     `age_type`       VARCHAR(7)     NOT NULL COMMENT '연령 분류 코드',
     `count`          INT            NOT NULL COMMENT '인원',
     `price`          DECIMAL(10, 2) NOT NULL COMMENT '가격',
-    PRIMARY KEY (`reservation_id`, `age_type`) USING BTREE,
+    PRIMARY KEY (`reservation_id`, `age_type`),
     KEY `FK_common_code_TO_reservation_count_1` (`age_type`),
     CONSTRAINT `FK_common_code_TO_reservation_count_1` FOREIGN KEY (`age_type`) REFERENCES `common_code` (`code_id`),
     CONSTRAINT `FK_reservation_TO_reservation_count_1` FOREIGN KEY (`reservation_id`) REFERENCES `reservation` (`reservation_id`)
@@ -648,3 +653,51 @@ CREATE TABLE `voucher_log`
     CONSTRAINT `FK_voucher_log_user_voucher` FOREIGN KEY (`user_voucher_id`) REFERENCES `user_voucher` (`user_voucher_id`)
 );
 
+-- 테이블 membership_log
+CREATE TABLE `membership_log`
+(
+    `membership_log_id` BIGINT   NOT NULL AUTO_INCREMENT COMMENT '맴버십 변경 내역',
+    `user_id`           BIGINT   NOT NULL COMMENT '회원 ID',
+    `membership_id`     INT      NOT NULL COMMENT '맴버십 ID',
+    `created_at`        DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성일자',
+    PRIMARY KEY (`membership_log_id`),
+    CONSTRAINT `FK_membership_log_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`),
+    CONSTRAINT `FK_membership_log_membership_id` FOREIGN KEY (`membership_id`) REFERENCES `membership_tier` (membership_id)
+);
+
+-- 테이블 payment_card
+CREATE TABLE `payment_card`
+(
+    `payment_id`           BIGINT     NOT NULL COMMENT '결제 ID',
+    `card_company_code`    VARCHAR(7) NOT NULL COMMENT '카드사 분류 코드',
+    `card_number`          VARCHAR(4) NOT NULL COMMENT '카드번호 끝 4자리',
+    `installment_months`   INT DEFAULT 0 COMMENT '0 = 일시불',
+    `card_approval_number` VARCHAR(10) COMMENT 'PG 승인번호',
+    PRIMARY KEY (payment_id),
+    CONSTRAINT `FK_payment_card_payment` FOREIGN KEY (payment_id) REFERENCES `payment` (`payment_id`),
+    CONSTRAINT `FK_payment_card_card_common_code` FOREIGN KEY (card_company_code) REFERENCES `common_code` (`code_id`)
+);
+
+-- 테이블 payment_bank_transfer
+CREATE TABLE `payment_bank_transfer`
+(
+    `payment_id`     BIGINT      NOT NULL COMMENT '결제 ID',
+    `bank_code`      VARCHAR(7)  NOT NULL COMMENT '은행 분류 코드',
+    `account_number` VARCHAR(30) NOT NULL COMMENT '계좌 번호',
+    `예금주 이름`         VARCHAR(12) NOT NULL COMMENT '예금주 이름',
+    PRIMARY KEY (payment_id),
+    CONSTRAINT `FK_payment_bank_transfer_payment` FOREIGN KEY (payment_id) REFERENCES `payment` (payment_id),
+    CONSTRAINT `FK_payment_bank_transfer_common_code` FOREIGN KEY (bank_code) REFERENCES `common_code` (`code_id`)
+);
+
+-- 테이블 payment_mobile
+CREATE TABLE `payment_mobile`
+(
+`payment_id`     BIGINT      NOT NULL COMMENT '결제 ID',
+        `carrier_code`      VARCHAR(7)  NOT NULL COMMENT '통신사 분류 코드',
+    `phone_number` VARCHAR(13) NOT NULL COMMENT '휴대폰 번호',
+    `approval_code` VARCHAR(10) NOT NULL COMMENT '결제 승인 번호',
+    PRIMARY KEY (payment_id),
+    CONSTRAINT `FK_payment_mobile_payment` FOREIGN KEY (payment_id) REFERENCES `payment` (payment_id),
+    CONSTRAINT `FK_payment_mobile` FOREIGN KEY (carrier_code) REFERENCES `common_code` (`code_id`)
+);
