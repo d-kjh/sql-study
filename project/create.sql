@@ -69,6 +69,7 @@ CREATE TABLE `coupon`
 (
     `coupon_id`           BIGINT         NOT NULL AUTO_INCREMENT COMMENT '쿠폰 ID',
     `coupon_code`         VARCHAR(7)     NOT NULL COMMENT '쿠폰 분류 코드',
+    `store_item_id`       BIGINT         NULL COMMENT '스토어 판매 쿠폰만',
     `coupon_name`         VARCHAR(50)    NOT NULL COMMENT '쿠폰 이름',
     `comment`             VARCHAR(200)   NOT NULL COMMENT '쿠폰 설명',
     `min_price`           DECIMAL(10, 2) NOT NULL DEFAULT 0.00 COMMENT '최소 사용 가능 금액',
@@ -80,7 +81,8 @@ CREATE TABLE `coupon`
     `is_active`           TINYINT(1)     NOT NULL DEFAULT 1 COMMENT '0: 비활성, 1: 활성',
     PRIMARY KEY (`coupon_id`),
     KEY `FK_coupon_common_code` (`coupon_code`),
-    CONSTRAINT `FK_coupon_common_code` FOREIGN KEY (`coupon_code`) REFERENCES `common_code` (`code_id`)
+    CONSTRAINT `FK_coupon_common_code` FOREIGN KEY (`coupon_code`) REFERENCES `common_code` (`code_id`),
+    CONSTRAINT `FK_coupon_store_item_id` FOREIGN KEY (`store_item_id`) REFERENCES `store_item` (`store_item_id`)
 );
 
 -- 테이블 age_type
@@ -186,6 +188,7 @@ CREATE TABLE `store_item`
     CONSTRAINT `FK_store_item_common_code` FOREIGN KEY (`store_item_code`) REFERENCES `common_code` (`code_id`)
 );
 
+/*
 -- 테이블 store_coupon
 CREATE TABLE `store_coupon`
 (
@@ -196,7 +199,7 @@ CREATE TABLE `store_coupon`
     CONSTRAINT `FK_coupon_TO_store_coupon_1` FOREIGN KEY (`coupon_id`) REFERENCES `coupon` (`coupon_id`),
     CONSTRAINT `FK_store_item_TO_store_coupon_1` FOREIGN KEY (`store_item_id`) REFERENCES `store_item` (`store_item_id`)
 );
-
+*/
 -- 테이블 order
 CREATE TABLE `order`
 (
@@ -317,24 +320,28 @@ CREATE TABLE `screen_time`
 -- 테이블 screen_schedule
 CREATE TABLE `screen_schedule`
 (
-    `schedule_id`  BIGINT         NOT NULL AUTO_INCREMENT COMMENT '상영 일정 ID',
-    `screen_id`    BIGINT         NOT NULL COMMENT '상영관 ID',
-    `movie_id`     BIGINT         NOT NULL COMMENT '영화 ID',
-    `employee_id`  BIGINT         NOT NULL COMMENT '직원(매니저) ID',
-    `running_date` DATE           NOT NULL COMMENT '상영일',
-    `start_time`   TIME           NOT NULL COMMENT '상영 시작 시간',
-    `end_time`     TIME           NOT NULL COMMENT '상영 종료 시간',
-    `price`        DECIMAL(10, 2) NOT NULL COMMENT '가격',
-    `is_delete`    TINYINT        NOT NULL DEFAULT '0' COMMENT '삭제 여부(0: 삭제안됨, 1: 삭제됨)',
-    `created_at`   DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성일자',
-    `updated_at`   DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정일자',
+    `schedule_id`  BIGINT     NOT NULL AUTO_INCREMENT COMMENT '상영 일정 ID',
+    `screen_id`    BIGINT     NOT NULL COMMENT '상영관 ID',
+    `screen_type`  VARCHAR(7) NOT NULL COMMENT '상영관 분류 코드',
+    `screen_time`  VARCHAR(7) NOT NULL COMMENT '상영 시간 분류 코드',
+    `movie_id`     BIGINT     NOT NULL COMMENT '영화 ID',
+    `employee_id`  BIGINT     NOT NULL COMMENT '직원(매니저) ID',
+    `running_date` DATE       NOT NULL COMMENT '상영일',
+    `start_time`   TIME       NOT NULL COMMENT '상영 시작 시간',
+    `end_time`     TIME       NOT NULL COMMENT '상영 종료 시간',
+    `is_delete`    TINYINT    NOT NULL DEFAULT '0' COMMENT '삭제 여부(0: 삭제안됨, 1: 삭제됨)',
+    `created_at`   DATETIME   NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성일자',
+    `updated_at`   DATETIME   NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정일자',
     PRIMARY KEY (`schedule_id`),
     KEY `FK_screen_schedule_screen` (`screen_id`),
     KEY `FK_screen_schedule_movie` (`movie_id`),
     KEY `FK_screen_schedule_employee` (`employee_id`),
     CONSTRAINT `FK_screen_schedule_employee` FOREIGN KEY (`employee_id`) REFERENCES `employee` (`employee_id`),
     CONSTRAINT `FK_screen_schedule_movie` FOREIGN KEY (`movie_id`) REFERENCES `movie` (`movie_id`),
-    CONSTRAINT `FK_screen_schedule_screen` FOREIGN KEY (`screen_id`) REFERENCES `screen` (`screen_id`)
+    CONSTRAINT `FK_screen_schedule_screen` FOREIGN KEY (`screen_id`) REFERENCES `screen` (`screen_id`),
+    CONSTRAINT `FK_screen_schedule_screen_type` FOREIGN KEY (`screen_type`) REFERENCES `common_code` (`code_id`),
+    CONSTRAINT `FK_screen_schedule_screen_time` FOREIGN KEY (`screen_time`) REFERENCES `common_code` (`code_id`)
+
 );
 
 -- 테이블 reservation
