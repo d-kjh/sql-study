@@ -210,3 +210,17 @@ WHERE EXISTS (SELECT 1
               FROM dept_manager dm
               WHERE de.dept_no = dm.dept_no)
 ORDER BY de.dept_no;
+
+SET @cnt := (
+    SELECT round(count(*) * 0.10)
+    FROM `user`
+    WHERE membership_id = 1
+    );
+
+SELECT @cnt;
+
+UPDATE `user`
+SET membership_id = 2
+WHERE membership_id = 1
+ORDER BY RAND()
+LIMIT @cnt;

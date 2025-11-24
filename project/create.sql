@@ -156,14 +156,13 @@ CREATE TABLE `movie`
 -- 테이블 non_user
 CREATE TABLE `non_user`
 (
-    `non_user_id`   BIGINT       NOT NULL AUTO_INCREMENT COMMENT '비회원 ID',
-    `password`      VARCHAR(100) NOT NULL COMMENT 'hashcode',
-    `name`          VARCHAR(10)  NOT NULL COMMENT 'GUEST_',
-    `phone`         VARCHAR(13)  NOT NULL COMMENT '7일 후 null 처리',
-    `birth`         VARCHAR(6)   NOT NULL COMMENT '주민등록번호 앞 6자리, 7일 후  null 처리',
-    `is_anonymized` TINYINT      NOT NULL DEFAULT '0' COMMENT '0: 유지, 1: 삭제',
-    `created_at`    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `deleted_at`    DATETIME              DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '삭제 update시',
+    `non_user_id` BIGINT       NOT NULL AUTO_INCREMENT COMMENT '비회원 ID',
+    `name`        VARCHAR(10)  NOT NULL COMMENT '이름',
+    `phone`       VARCHAR(13)  NOT NULL COMMENT '전화 번호',
+    `birth`       VARCHAR(6)   NOT NULL COMMENT '생년월일 6자리',
+    `password`    VARCHAR(100) NOT NULL COMMENT '숫자 4자리',
+    `created_at`  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `expire_at`   DATETIME     NOT NULL COMMENT '상영 종료/예매 취소',
     PRIMARY KEY (`non_user_id`)
 );
 
