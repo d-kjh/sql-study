@@ -46,7 +46,7 @@ LIMIT 8897;
 UPDATE `user`
 SET is_delete = 1
 ORDER BY rand()
-LIMIT 3938;
+LIMIT 10000;
 
 SELECT count(*) FROM user
 WHERE point >= 24000 AND ('2023-11-24 00:00:00' <= created_at);
@@ -112,3 +112,10 @@ SET membership_id =
     END;
 
 
+SELECT
+    pl.user_id,
+    SUM(CASE WHEN pl.change_amount > 0 THEN pl.change_amount ELSE 0 END) AS earned_last_year
+FROM point_log pl
+WHERE pl.created_at >= DATE_SUB(CURDATE(), INTERVAL 1 YEAR)
+  AND pl.created_at < CURDATE()           -- 오늘은 제외 (전월까지)
+GROUP BY pl.user_id;

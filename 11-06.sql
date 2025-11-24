@@ -223,4 +223,29 @@ UPDATE `user`
 SET membership_id = 2
 WHERE membership_id = 1
 ORDER BY RAND()
-LIMIT @cnt;
+LIMIT 5469;
+
+
+SELECT pl.user_id ,SUM(case when pl.change_amount > 0 then pl.change_amount ELSE 0 END) FROM point_log pl
+WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 1 YEAR)
+AND created_at < CURDATE() -- 오늘 제외 왜냐면 오늘은 1일로 설정 할 것이기 때문
+GROUP BY user_id;
+
+SELECT COUNT(1) FROM `user`
+WHERE is_delete = 0;
+
+SELECT u.user_id FROM `user` u
+LEFT JOIN (
+SELECT pl.user_id ,
+SUM(case when pl.change_amount > 0 then pl.change_amount ELSE 0 END) AS earned_last_year
+FROM point_log pl
+WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 1 YEAR)
+AND created_at < CURDATE()
+GROUP BY user_id) p 
+ON u.user_id = p.user_id
+WHERE u.membership_id = case
+when IFNULL(p.earned_last_year, 0) >= 24000 then 5
+when IFNULL(p.earned_last_year, 0) >= 18000 then 4
+when IFNULL(p.earned_last_year, 0) >= 12000 then 3
+when IFNULL(p.earned_last_year, 0) >= 6000 then 2
+ELSE 1 END;
