@@ -1,3 +1,0 @@
-SELECT *
-FROM employees
-WHERE emp_no BETWEEN 11000 AND 11009;
