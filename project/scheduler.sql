@@ -1,12 +1,58 @@
 DELIMITER $$
 
-CREATE EVENT ev_membership_update_monthly
+CREATE EVENT ev_update_membership_by_yearly_point
 ON SCHEDULE
-EVERY 1 MONTH
-STARTS '2025-12-01 09:30:00'
+    EVERY 1 MONTH
+    STARTS (TIMESTAMP(CURRENT_DATE, '04:00:00'))
+    ON COMPLETION PRESERVE
 DO
 BEGIN
-    -- 1년 적립 포인트 기준 재계산
-    UPDATE `user` u
+    UPDATE user u
+    JOIN (
+        SELECT
+            pl.user_id,
+            SUM(
+                CASE WHEN pl.change_amount > 0 THEN pl.change_amount ELSE 0 END
+            ) AS total_earn_point
+        FROM point_log pl
+        WHERE pl.created_at >= DATE_SUB(CURRENT_DATE, INTERVAL 1 YEAR)
+          AND pl.created_at < CURRENT_DATE
+        GROUP BY pl.user_id
+    ) p ON u.user_id = p.user_id
+    JOIN (
+        SELECT
+            p2.user_id,
+            (
+                SELECT mt.membership_id
+                FROM membership_tier mt
+                WHERE mt.promote_min_point <= p2.total_earn_point
+                ORDER BY mt.promote_min_point DESC
+                LIMIT 1
+            ) AS new_membership_id
+        FROM (
+            SELECT
+                pl.user_id,
+                SUM(
+                    CASE WHEN pl.change_amount > 0 THEN pl.change_amount ELSE 0 END
+                ) AS total_earn_point
+            FROM point_log pl
+            WHERE pl.created_at >= DATE_SUB(CURRENT_DATE, INTERVAL 1 YEAR)
+              AND pl.created_at < CURRENT_DATE
+            GROUP BY pl.user_id
+        ) p2
+    ) t ON u.user_id = t.user_id
+    SET u.membership_id = t.new_membership_id
+    WHERE u.is_delete = 0;  -- 탈퇴회원 제외
+END$$
 
-END $$
+DELIMITER ;
+
+
+CREATE EVENT ev_expire_user_voucher
+ON SCHEDULE EVERY 1 DAY
+STARTS '2025-01-01 03:00:00'
+DO
+  UPDATE user_voucher
+  SET status = 2
+  WHERE status = 0
+    AND expire_date < CURDATE();

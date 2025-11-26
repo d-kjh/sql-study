@@ -3,7 +3,6 @@
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/2025-02-sql-dummy-data" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/NegaDummy" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/dummy" vcs="Git" />
   </component>
 </project>

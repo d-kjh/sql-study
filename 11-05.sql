@@ -361,3 +361,35 @@ FROM salaries
 WHERE use_yn = '1';
 
 
+SELECT @@profiling;
+-- 프로파일링 활성화
+SET profiling = 1;
+-- 프로파일링 비활성화
+SET profiling = 0;
+-- 프로파일링 히스토리 리셋 후 저장 공간확보
+SET @@profiling_history_size = 0;
+SET @@profiling_history_size = 10;
+-- 프로파일링 내용 확인
+SHOW PROFILES;
+
+
+# 필요 이상으로 많은 정보를 가져오는 나쁜 SQL문
+SELECT count(s.emp_no) as cnt
+from (SELECT e.emp_no, dm.dept_no
+      FROM (SELECT * FROM employees
+                     WHERE gender = 'M'
+                     AND emp_no > 300000) e
+               LEFT JOIN dept_manager dm
+                         ON dm.emp_no = e.emp_no) s;
+
+SELECT COUNT(s.emp_no) AS cnt
+FROM (SELECT e.emp_no
+      FROM (SELECT *
+            FROM employees
+            WHERE gender = 'M'
+              AND emp_no > 300000) e) s;
+
+SELECT count(emp_no) as cnt
+FROM employees
+WHERE gender = 'M'
+AND emp_no > 300000;

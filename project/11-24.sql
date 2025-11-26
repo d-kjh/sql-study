@@ -7,7 +7,10 @@ SET FOREIGN_KEY_CHECKS = 1;
 ALTER TABLE `non_user`
     AUTO_INCREMENT = 1;
 
-ALTER TABLE `point_log`
+ALTER TABLE `reservation`
+    AUTO_INCREMENT = 1;
+
+ALTER TABLE `reservation_count`
     AUTO_INCREMENT = 1;
 
 ALTER TABLE ticket_discount
@@ -60,8 +63,6 @@ LIMIT 4624;
 UPDATE `user`
 SET point = FLOOR(24000 + RAND() * 6000)
 WHERE membership_id = 5 AND point < 24000;
-
-
 
 # 포인트 로그 테이블 insert 작업 (적립은 아직 없음 - DB 이관 작업 느낌)
 
