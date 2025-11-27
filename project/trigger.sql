@@ -145,7 +145,8 @@ END $$
 
 DELIMITER ;
 
--- reservation에 상태값이 취소로 변경이 되면 예매 좌석, 예매 인원 삭제
+-- reservation에 상태값이 취소로 변경이 되면 예매 좌석, 예매 인원 삭제(더미용)
+DROP TRIGGER trg_reservation_after_update;
 
 DELIMITER $$
 
