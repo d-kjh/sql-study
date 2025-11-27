@@ -139,9 +139,44 @@ CREATE TRIGGER trg_coupon_detail_after_insert
     ON coupon_detail
     FOR EACH ROW
 BEGIN
-    INSERT INTO coupon_log(user_coupon_id)
-    VALUES (NEW.user_coupon_id);
+    INSERT INTO coupon_log(user_coupon_id, created_at)
+    VALUES (NEW.user_coupon_id, NEW.issue_date);
 END $$
 
 DELIMITER ;
+
+-- reservation에 상태값이 취소로 변경이 되면 예매 좌석, 예매 인원 삭제
+
+DELIMITER $$
+
+CREATE TRIGGER trg_reservation_after_update
+    AFTER UPDATE
+    ON reservation
+    FOR EACH ROW
+BEGIN
+    -- 상태가 2로 변경이 된다면
+    IF NEW.status = 2 AND OLD.status <> 2 THEN
+
+        -- 예매별 예매 좌석 + 실제 좌석 같이 삭제
+        DELETE rs, rsl
+        FROM reservation_seat_list rsl
+                 JOIN reservation_seat rs
+                      ON rs.reservation_seat_id = rsl.reservation_seat_id
+        WHERE reservation_id = NEW.reservation_id;
+
+        -- 예매 인원 삭제
+        DELETE FROM reservation_count WHERE reservation_id = NEW.reservation_id;
+    END IF;
+
+END $$
+
+DELIMITER ;
+
+
+
+
+
+
+
+
 
