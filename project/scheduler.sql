@@ -43,27 +43,27 @@ DELIMITER $$
 
 CREATE EVENT ev_expire_user_voucher
     ON SCHEDULE EVERY 1 DAY
-        STARTS '2025-01-01 03:00:00'
+        STARTS (CURRENT_DATE + INTERVAL 1 HOUR)
     DO
     UPDATE user_voucher
     SET status = 2
     WHERE status = 0
-      AND expire_date < CURDATE();
+      AND expire_date < NOW();
 
 DELIMITER ;
-
 
 
 DELIMITER $$
 
 CREATE EVENT evt_delete_non_user_daily
-ON SCHEDULE EVERY 1 DAY
-STARTS (current_date + INTERVAL 1 HOUR)
-DO
-BEGIN
-    DELETE nu
-    FROM non_user nu;
+    ON SCHEDULE EVERY 1 DAY
+        STARTS (CURRENT_DATE + INTERVAL 1 HOUR)
+    DO
+    BEGIN
+        DELETE
+        FROM non_user
+        WHERE expire_at < NOW();
 
-END $$
+    END $$
 
 DELIMITER ;

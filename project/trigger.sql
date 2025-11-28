@@ -174,6 +174,38 @@ END $$
 DELIMITER ;
 
 
+DELIMITER $$
+
+CREATE TRIGGER trg_reservation_ai_non_user_expire
+    AFTER INSERT
+    ON reservation
+    FOR EACH ROW
+BEGIN
+    DECLARE v_end_time DATETIME;
+    DECLARE v_new_expire DATETIME;
+    IF NEW.non_user_id IS NOT NULL THEN
+
+        -- 1. 상영 종료 시간 가져오기
+        SELECT ss.end_time
+        INTO v_end_time
+        FROM screen_schedule ss
+        WHERE ss.schedule_id = NEW.schedule_id;
+
+        -- 2. +7일 계산
+        SET v_new_expire = DATE_ADD(v_end_time, INTERVAL 7 DAY);
+
+        -- 3. non_user.expire_at 갱신 (더 늦을 때만 변경)
+        UPDATE non_user
+        SET expire_at = CASE
+                            WHEN expire_at < v_new_expire
+                                THEN v_new_expire
+                            ELSE expire_at
+            END
+        WHERE non_user_id = NEW.non_user_id;
+    END IF;
+END $$
+
+DELIMITER ;
 
 
 
