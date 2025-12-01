@@ -7,15 +7,13 @@
     <file url="file://$PROJECT_DIR$/11-06.sql" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/11-10.sql" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/11-11.sql" dialect="MySQL" />
-    <file url="file://$PROJECT_DIR$/11-12.sql" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/11-13.sql" dialect="MySQL" />
-    <file url="file://$PROJECT_DIR$/11-28.sql" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/dummy_study.sql" dialect="MySQL" />
-    <file url="file://$PROJECT_DIR$/project/11-24.sql" dialect="MySQL" />
-    <file url="file://$PROJECT_DIR$/project/11-25.sql" dialect="MySQL" />
-    <file url="file://$PROJECT_DIR$/project/11-26.sql" dialect="MySQL" />
+    <file url="file://$PROJECT_DIR$/project/11-12.sql" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/project/11-27.sql" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/project/11-27_dummy.sql" dialect="MySQL" />
+    <file url="file://$PROJECT_DIR$/project/11-28.sql" dialect="MySQL" />
+    <file url="file://$PROJECT_DIR$/project/12-01.sql" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/project/create.sql" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/project/insert.sql" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/project/scheduler.sql" dialect="MySQL" />

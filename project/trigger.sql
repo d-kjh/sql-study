@@ -173,10 +173,9 @@ END $$
 
 DELIMITER ;
 
-
 DELIMITER $$
 
-CREATE TRIGGER trg_reservation_ai_non_user_expire
+CREATE TRIGGER trg_reservation_non_user_expire
     AFTER INSERT
     ON reservation
     FOR EACH ROW
@@ -206,6 +205,9 @@ BEGIN
 END $$
 
 DELIMITER ;
+
+DELIMITER $$
+
 
 
 
