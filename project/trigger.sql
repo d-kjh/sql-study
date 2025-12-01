@@ -48,6 +48,7 @@ END $$
 DELIMITER ;
 
 -- 쿠폰 테이블 변경시 사용 내역 insert
+DROP TRIGGER trg_coupon_detail_update;
 
 DELIMITER  $$
 

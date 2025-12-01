@@ -194,3 +194,119 @@ SHOW TRIGGERS LIKE 'point%';
 SHOW TRIGGERS LIKE 'ticket_discount%';
 SHOW TRIGGERS LIKE 'payment%';
 SHOW TRIGGERS LIKE 'reservation%';
+
+
+SELECT
+    pl.*,
+    CASE
+        WHEN pl.status = 0 AND pl.change_amount > 0 THEN '적립'
+        WHEN pl.status = 1 AND pl.change_amount < 0 THEN '사용'
+        WHEN pl.status = 3 AND pl.change_amount > 0 THEN '사용 취소/환불'
+        WHEN pl.status = 2 THEN '소멸'
+        ELSE '기타'
+    END AS log_meaning
+FROM point_log pl
+WHERE pl.user_id = 20910
+ORDER BY pl.created_at;
+
+SELECT * FROM coupon_detail WHERE user_coupon_id = 3915;
+
+SELECT * FROM reservation WHERE user_id = 20910;
+
+SELECT user_id,
+       SUM(change_amount) AS refund_sum
+FROM point_log
+WHERE status = 3         -- 사용 취소/환불
+AND created_at
+GROUP BY user_id;
+
+START TRANSACTION;
+
+-- 1-1. 11월 27일자 환불 로그( status = 3 )가 사용자별로 얼마나 있는지 확인
+SELECT user_id,
+       SUM(change_amount) AS refund_sum
+FROM point_log
+WHERE status = 3
+  AND change_amount > 0              -- 안전하게: 환불은 양수만
+  AND DATE(created_at) = '2025-11-27'
+GROUP BY user_id;
+
+-- 1-2. 환불 효과를 되돌리기: user.point 에서 환불 금액만큼 빼기
+UPDATE user u
+JOIN (
+    SELECT user_id,
+           SUM(change_amount) AS refund_sum
+    FROM point_log
+    WHERE status = 3
+      AND change_amount > 0
+      AND DATE(created_at) = '2025-11-27'
+    GROUP BY user_id
+) p ON u.user_id = p.user_id
+SET u.point = u.point - p.refund_sum
+WHERE p.user_id IS NOT NULL;   -- ← 이 한 줄
+
+-- 1-3. 이제 11월 27일자 환불 로그만 깔끔하게 삭제
+DELETE
+FROM point_log
+WHERE status = 3
+  AND change_amount > 0
+  AND DATE(created_at) = '2025-11-27';
+
+COMMIT;
+
+
+START TRANSACTION;
+
+UPDATE coupon_detail cd
+JOIN (
+    SELECT DISTINCT user_coupon_id
+    FROM coupon_log
+    WHERE status = 3
+      AND DATE(created_at) = '2025-11-27'
+) cl ON cl.user_coupon_id = cd.user_coupon_id
+SET cd.status = 1;
+
+-- (3) coupon_log 취소 로그 삭제
+DELETE
+FROM coupon_log
+WHERE status = 3
+  AND DATE(created_at) = '2025-11-27';
+
+COMMIT;
+
+SELECT * FROM coupon_detail
+WHERE status = 3;
+
+
+SELECT user_coupon_id,
+       GROUP_CONCAT(status ORDER BY created_at) AS status_history
+FROM coupon_log
+WHERE DATE(created_at) = '2025-11-27'
+GROUP BY user_coupon_id
+HAVING SUM(status = 1) > 0
+   AND SUM(status = 3) > 0;
+
+UPDATE coupon_detail cd
+JOIN (
+    SELECT user_coupon_id
+    FROM coupon_log
+    WHERE DATE(created_at) = '2025-11-27'
+    GROUP BY user_coupon_id
+    HAVING SUM(status = 1) > 0
+       AND SUM(status = 3) > 0
+) l ON l.user_coupon_id = cd.user_coupon_id
+SET cd.status = 1      -- 사용으로 통일
+WHERE cd.status <> 1;  -- 원래부터 1인 애는 건드리지 않기
+
+DELETE cl
+FROM coupon_log cl
+JOIN (
+    SELECT user_coupon_id
+    FROM coupon_log
+    WHERE DATE(created_at) = '2025-11-27'
+    GROUP BY user_coupon_id
+    HAVING SUM(status = 1) > 0
+       AND SUM(status = 3) > 0
+) l ON l.user_coupon_id = cl.user_coupon_id
+WHERE cl.status = 3
+  AND DATE(cl.created_at) = '2025-11-27';
