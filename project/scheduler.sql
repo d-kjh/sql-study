@@ -1,10 +1,10 @@
 SHOW VARIABLES WHERE variable_name LIKE '%event%';
 
-DROP EVENT evt_update_membership_yearly_point;
+DROP EVENT test_evt_update_membership_yearly_point;
 
 DELIMITER $$
 
-CREATE EVENT evt_update_membership_yearly_point
+CREATE EVENT test_evt_update_membership_yearly_point
     ON SCHEDULE
         EVERY 1 MONTH
             STARTS (TIMESTAMP(CURRENT_DATE, '01:00:00'))
@@ -103,3 +103,53 @@ CREATE EVENT evt_update_store_daily
     END $$
 
 DELIMITER ;
+
+DROP EVENT evt_update_coupon_detail;
+
+DELIMITER $$
+
+CREATE EVENT evt_update_coupon_detail
+    ON SCHEDULE EVERY 1 DAY
+        STARTS (TIMESTAMP(CURRENT_DATE, '00:01:00'))
+    DO
+    BEGIN
+        UPDATE coupon_detail
+        SET status = 2
+        WHERE expired_date < NOW();
+    END $$
+
+DELIMITER ;
+
+DELIMITER $$
+
+CREATE EVENT evt_issue_membership_coupon_monthly
+    ON SCHEDULE
+        EVERY 1 MONTH
+            -- 매 달 1일 06시
+            STARTS TIMESTAMP(DATE_FORMAT(CURRENT_DATE, '%Y-%m-01'), '06:00:00')
+    DO
+    BEGIN
+        INSERT INTO coupon_detail (user_id, coupon_id, issue_date, expired_date, status)
+        SELECT u.user_id,
+               c.coupon_id,
+               NOW()                                         AS issue_date,
+               TIMESTAMP(LAST_DAY(CURRENT_DATE), '23:59:59') AS expired_date, -- 그 달의 마지막날 23시 59분 59초로 포맷
+               0                                             AS status
+        FROM user u
+                 INNER JOIN coupon c
+                            ON c.membership_id = u.membership_id
+        WHERE u.is_delete = 0
+          AND u.membership_id <> 1 -- basic등급은 제외하기 위해
+          AND c.membership_id IS NOT NULL
+          AND c.is_active = 1
+          -- 매 달 중복체크( 중복 발급 방지 )
+          AND NOT EXISTS (SELECT 1
+                          FROM coupon_detail cd
+                          WHERE cd.user_id = u.user_id
+                            AND cd.coupon_id = c.coupon_id
+                            AND cd.issue_date >= DATE_FORMAT(CURRENT_DATE, '%Y-%m-01')
+                            AND cd.issue_date < DATE_FORMAT(CURRENT_DATE + INTERVAL 1 MONTH, '%Y-%m-01'));
+    END $$
+
+DELIMITER ;
+
