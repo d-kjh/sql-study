@@ -57,8 +57,11 @@ CREATE TRIGGER trg_coupon_detail_update
     ON coupon_detail
     FOR EACH ROW
 BEGIN
-    INSERT INTO coupon_log (user_coupon_id, status)
-    VALUES (new.user_coupon_id, NEW.status);
+    IF OLD.status <> NEW.status THEN
+        INSERT INTO coupon_log (user_coupon_id, status)
+        VALUES (new.user_coupon_id, NEW.status);
+    END IF
+    $$
 END $$
 
 DELIMITER ;
@@ -125,8 +128,11 @@ CREATE TRIGGER trg_user_voucher_after_update
     ON user_voucher
     FOR EACH ROW
 BEGIN
-    INSERT INTO voucher_log(user_voucher_id, status)
-    VALUES (new.user_voucher_id, NEW.status);
+    IF OLD.status <> NEW.status THEN
+        INSERT INTO voucher_log(user_voucher_id, status)
+        VALUES (new.user_voucher_id, NEW.status);
+    END IF
+    $$
 END $$
 
 DELIMITER ;
@@ -207,6 +213,7 @@ END $$
 
 DELIMITER ;
 
+
 DELIMITER $$
 
 CREATE TRIGGER trg_movie_after_update
@@ -214,15 +221,88 @@ CREATE TRIGGER trg_movie_after_update
     ON movie
     FOR EACH ROW
 BEGIN
-    UPDATE screen_schedule
-    SET is_delete = 1
-    WHERE movie_id = NEW.movie_id;
+    -- 0 -> 1 로 바뀔 때만 동작
+    IF OLD.is_delete <> 1 AND NEW.is_delete = 1 THEN
+        DELETE
+        FROM theater_movie
+        WHERE movie_id = NEW.movie_id
+          AND end_date >= CURDATE();
+    END IF;
 END $$
 
 DELIMITER ;
 
+DELIMITER $$
 
+CREATE TRIGGER trg_theater_movie_after_delete
+    AFTER DELETE
+    ON theater_movie
+    FOR EACH ROW
+BEGIN
+    UPDATE screen_schedule ss
+        JOIN screen s
+        ON ss.screen_id = s.screen_id
+    SET ss.is_delete = 1
+    WHERE s.theater_id = OLD.theater_id
+      AND ss.movie_id = OLD.movie_id
+      AND ss.is_delete = 0
+      -- 아직 시작도 안 한 상영 예정 일정만 삭제
+      AND TIMESTAMP(ss.running_date, ss.start_time) > NOW();
+END $$
 
+DELIMITER ;
 
+DELIMITER $$
 
+CREATE TRIGGER trg_screen_after_update
+    AFTER UPDATE
+    ON screen
+    FOR EACH ROW
+BEGIN
+    -- is_delete 값이 바뀔 때만 동작
+    IF OLD.is_delete <> NEW.is_delete THEN
+
+        -- 상영관이 삭제될 때 (0 -> 1)
+        IF NEW.is_delete = 1 THEN
+            -- 아직 시작도 안 한 상영 예정 일정만 삭제 처리
+            UPDATE screen_schedule ss
+            SET ss.is_delete = 1
+            WHERE ss.screen_id = NEW.screen_id
+              AND ss.is_delete = 0
+              AND TIMESTAMP(ss.running_date, ss.start_time) > NOW();
+            -- 여기서 is_delete가 0 -> 1로 바뀌는 애들만
+            -- screen_schedule AFTER UPDATE 트리거 타면서 예매/좌석 취소 처리
+        END IF;
+
+        -- 좌석은 삭제/복구 모두 상영관과 동기화
+        UPDATE seat
+        SET is_delete = NEW.is_delete
+        WHERE screen_id = NEW.screen_id;
+
+    END IF;
+END $$
+
+DELIMITER ;
+
+DELIMITER $$
+
+CREATE TRIGGER trg_screen_schedule_after_update
+    AFTER UPDATE
+    ON screen_schedule
+    FOR EACH ROW
+BEGIN
+    -- 0 -> 1 로 처음 삭제될 때만 실행 (중복 실행 방지)
+    IF OLD.is_delete <> 1 AND NEW.is_delete = 1 THEN
+        -- 혹시 모를 상황 대비: 정말 상영예정인 경우에만 처리
+        IF TIMESTAMP(NEW.running_date, NEW.start_time) > NOW() THEN
+            -- 해당 상영 일정의 예매 완료 건들만 취소 상태로 변경
+            UPDATE reservation r
+            SET r.status = 2 -- 2 = 취소
+            WHERE r.schedule_id = NEW.schedule_id
+              AND r.status = 1; -- 1 = 예매 완료
+        END IF;
+    END IF;
+END $$
+
+DELIMITER ;
 
