@@ -209,7 +209,17 @@ DELIMITER ;
 
 DELIMITER $$
 
+CREATE TRIGGER trg_movie_after_update
+    AFTER UPDATE
+    ON movie
+    FOR EACH ROW
+BEGIN
+    UPDATE screen_schedule
+    SET is_delete = 1
+    WHERE movie_id = NEW.movie_id;
+END $$
 
+DELIMITER ;
 
 
 
