@@ -1,7 +1,6 @@
 DROP TRIGGER trg_user_before_insert_membership_card;
 
 -- 회원가입시 카드 번호 지급
-
 DELIMITER $$
 
 CREATE TRIGGER trg_user_before_insert_membership_card
@@ -33,7 +32,6 @@ END$$
 DELIMITER ;
 
 -- 회원가입시 가입축하 쿠폰 지급
-
 DELIMITER $$
 
 CREATE TRIGGER trg_user_after_insert_join_coupon
@@ -48,8 +46,6 @@ END $$
 DELIMITER ;
 
 -- 쿠폰 테이블 변경시 사용 내역 insert
-DROP TRIGGER trg_coupon_detail_update;
-
 DELIMITER  $$
 
 CREATE TRIGGER trg_coupon_detail_update
@@ -89,7 +85,6 @@ END$$
 DELIMITER ;
 
 -- 포인트 로그 insert시 자동으로 point 계산
-
 DELIMITER $$
 
 CREATE TRIGGER trg_point_log_after_insert
@@ -105,7 +100,6 @@ END $$
 DELIMITER ;
 
 -- 스토어에서 교환권 구매시 유저 보유 및 로그 추가
-
 DELIMITER $$
 
 CREATE TRIGGER trg_user_voucher_after_insert
@@ -120,7 +114,6 @@ END $$
 DELIMITER ;
 
 -- 회원이 보유한 교환권 사용 및 만료 시 로그 추가
-
 DELIMITER $$
 
 CREATE TRIGGER trg_user_voucher_after_update
@@ -138,7 +131,6 @@ END $$
 DELIMITER ;
 
 -- coupon_detail에 insert 발생 시 log 추가
-
 DELIMITER $$
 
 CREATE TRIGGER trg_coupon_detail_after_insert
@@ -153,8 +145,6 @@ END $$
 DELIMITER ;
 
 -- reservation에 상태값이 취소로 변경이 되면 예매 좌석, 예매 인원 삭제(더미용)
-DROP TRIGGER trg_reservation_after_update;
-
 DELIMITER $$
 
 CREATE TRIGGER trg_reservation_after_update
@@ -180,6 +170,7 @@ END $$
 
 DELIMITER ;
 
+# 예매 신청 시 비회원 정보 삭제기간 update
 DELIMITER $$
 
 CREATE TRIGGER trg_reservation_non_user_expire
@@ -213,7 +204,7 @@ END $$
 
 DELIMITER ;
 
-
+# 영화가 삭제(soft delete)되면 영화관에 등록된 영화 테이블 hard delete
 DELIMITER $$
 
 CREATE TRIGGER trg_movie_after_update
@@ -232,6 +223,7 @@ END $$
 
 DELIMITER ;
 
+# 영화관에 등록된 영화 테이블 hard delete되면 상영일정에서 그 영화관의 해당 영화 상영일정 모두 soft delete
 DELIMITER $$
 
 CREATE TRIGGER trg_theater_movie_after_delete
@@ -252,6 +244,7 @@ END $$
 
 DELIMITER ;
 
+# 상영관이 soft delete될 시 상영일정에서 해당 상영관의 상영예정인 모든 영화상영일정을 soft delete
 DELIMITER $$
 
 CREATE TRIGGER trg_screen_after_update
@@ -284,6 +277,7 @@ END $$
 
 DELIMITER ;
 
+# 상영일정에서 soft delete될 시 상영예정인 일정인지 다시 확인 후 예매 취소 처리
 DELIMITER $$
 
 CREATE TRIGGER trg_screen_schedule_after_update
@@ -295,11 +289,10 @@ BEGIN
     IF OLD.is_delete <> 1 AND NEW.is_delete = 1 THEN
         -- 혹시 모를 상황 대비: 정말 상영예정인 경우에만 처리
         IF TIMESTAMP(NEW.running_date, NEW.start_time) > NOW() THEN
-            -- 해당 상영 일정의 예매 완료 건들만 취소 상태로 변경
+            -- 해당 상영 일정의 예매 건들만 취소 상태로 변경
             UPDATE reservation r
             SET r.status = 2 -- 2 = 취소
-            WHERE r.schedule_id = NEW.schedule_id
-              AND r.status = 1; -- 1 = 예매 완료
+            WHERE r.schedule_id = NEW.schedule_id;
         END IF;
     END IF;
 END $$

@@ -1,10 +1,11 @@
 SHOW VARIABLES WHERE variable_name LIKE '%event%';
 
-DROP EVENT test_evt_update_membership_yearly_point;
+DROP EVENT evt_update_membership_yearly_point;
 
+# 1년간 적립한 포인트 합산해서 선정 기준으로 각 맴버십 등급 별로 승급/강등 스케줄러
 DELIMITER $$
 
-CREATE EVENT test_evt_update_membership_yearly_point
+CREATE EVENT evt_update_membership_yearly_point
     ON SCHEDULE
         EVERY 1 MONTH
             STARTS (TIMESTAMP(CURRENT_DATE, '01:00:00'))
@@ -57,7 +58,7 @@ CREATE EVENT test_evt_update_membership_yearly_point
 
 DELIMITER ;
 
-
+# 스토어 구매 상품 중 교환권 만료 처리 스케줄러
 DELIMITER $$
 
 CREATE EVENT ev_expire_user_voucher
@@ -71,7 +72,7 @@ CREATE EVENT ev_expire_user_voucher
 
 DELIMITER ;
 
-
+# 비회원 정보 삭제 스케줄러
 DELIMITER $$
 
 CREATE EVENT evt_delete_non_user_daily
@@ -87,7 +88,7 @@ CREATE EVENT evt_delete_non_user_daily
 
 DELIMITER ;
 
-
+# store 판매 품목 중 판매일이 지난 품목(굿즈 같은 한정 상품 등) 삭제(숨김 - soft delete) 처리 스케줄러
 DELIMITER $$
 
 CREATE EVENT evt_update_store_daily
@@ -106,6 +107,7 @@ DELIMITER ;
 
 DROP EVENT evt_update_coupon_detail;
 
+# 보유 쿠폰 만료일이 지난 쿠폰들 만료 처리 스케줄러
 DELIMITER $$
 
 CREATE EVENT evt_update_coupon_detail
@@ -120,6 +122,7 @@ CREATE EVENT evt_update_coupon_detail
 
 DELIMITER ;
 
+# 매달 맴버십 별로 맴버십 쿠폰 발급 스케줄러
 DELIMITER $$
 
 CREATE EVENT evt_issue_membership_coupon_monthly
