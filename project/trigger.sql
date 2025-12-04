@@ -299,3 +299,22 @@ END $$
 
 DELIMITER ;
 
+# 포인트 로그 포인트 자동 계산
+DELIMITER $$
+
+CREATE TRIGGER trg_point_log_before_insert
+    BEFORE INSERT
+    ON point_log
+    FOR EACH ROW
+BEGIN
+    DECLARE v_current_point DECIMAL(10, 2);
+
+    -- 현재 user의 잔여 포인트를 읽어옴
+    SELECT point
+    INTO v_current_point
+    FROM user
+    WHERE user_id = NEW.user_id;
+
+    -- 새 로그 후의 잔액(balance_after) 계산
+    SET NEW.balance_after = v_current_point + NEW.change_amount;
+END $$

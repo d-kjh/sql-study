@@ -156,3 +156,85 @@ CREATE EVENT evt_issue_membership_coupon_monthly
 
 DELIMITER ;
 
+DELIMITER $$
+
+CREATE DEFINER = odd_adv_1@`%` EVENT evt_expire_point_after_2years
+    ON SCHEDULE
+        EVERY 1 DAY -- 하루에 한 번 실행
+            STARTS '2025-12-06 03:00:00' -- 원하는 시작 시간으로 바꿔도 됨
+    ON COMPLETION PRESERVE
+    ENABLE
+    DO
+    BEGIN
+        -- 1) 기준일 계산 : 오늘 기준 2년 전
+        DECLARE v_cutoff DATE;
+        SET v_cutoff = DATE_SUB(CURDATE(), INTERVAL 2 YEAR);
+
+        /*
+          2) 각 user 별로 "얼마를 소멸시킬지" 계산해서
+             point_log에 소멸 로그를 INSERT 한다.
+
+             핵심 계산 로직 (base 서브쿼리 안):
+             - old_saved        : 2년이 지난 적립/롤백 포인트 합계
+             - used_or_expired  : 지금까지 사용/소멸한 포인트 합계(절댓값)
+             - current_point    : 현재 보유 포인트 (user.point)
+
+             expire_amount = max(0, min(old_saved - used_or_expired, current_point))
+
+             마지막 SELECT에서
+             expire_amount > 0 인 유저만 INSERT 한다.
+        */
+
+        INSERT INTO point_log (user_id, change_amount, status, created_at)
+        SELECT t.user_id,
+               -t.expire_amount AS change_amount, -- 음수로 넣기 (차감)
+               2                AS status,        -- 2 = 소멸
+               NOW()            AS created_at
+        FROM (SELECT base.user_id,
+                     base.current_point,
+                     base.old_saved,
+                     base.used_or_expired,
+
+                     -- 실제 소멸할 포인트 양 계산
+                     GREATEST( -- 뒤에 값이 음수면 0으로 변경
+                             0,
+                             LEAST( -- 두 값중 작은 값 반환
+                                     base.old_saved - base.used_or_expired, -- 2년 지난 것 중 아직 안 쓴 양
+                                     base.current_point -- 현재 보유 포인트 이상 소멸 금지
+                             )
+                     ) AS expire_amount
+              FROM (SELECT u.user_id,
+                           u.point        AS current_point,
+
+                           -- 2년 이상 된 적립/롤백 포인트 합계 (양수) null이면 0으로 변경
+                           COALESCE(SUM(
+                                            CASE
+                                                WHEN pl.status = 0 -- 0: 적립
+                                                    AND pl.created_at < v_cutoff -- 2년이 지난 것만 대상
+                                                    THEN pl.change_amount -- 양수
+                                                ELSE 0
+                                                END
+                                    ), 0) AS old_saved,
+
+                           -- 지금까지 사용/소멸한 포인트 합계 (절댓값, 양수로)
+                           COALESCE(SUM( -- null이면 0으로 변경
+                                            CASE
+                                                WHEN pl.status IN (1, 2) -- 1: 사용, 2: 소멸
+                                                    THEN -pl.change_amount -- change_amount는 음수라서 -붙여 양수로
+                                                ELSE 0
+                                                END
+                                    ), 0) AS used_or_expired
+
+                    FROM user u
+                             LEFT JOIN point_log pl
+                                       ON pl.user_id = u.user_id
+                    GROUP BY u.user_id) AS base) AS t
+        -- 3) 실제로 소멸할 포인트가 있는 유저만 INSERT
+        WHERE t.expire_amount > 0;
+
+        -- point_log에 INSERT 되면
+        -- BEFORE INSERT 트리거 -> balance_after 계산
+        -- AFTER INSERT 트리거  -> user.point 에서 expire_amount 만큼 차감
+    END $$
+
+DELIMITER ;
