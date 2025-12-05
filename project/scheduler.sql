@@ -166,7 +166,7 @@ CREATE DEFINER = odd_adv_1@`%` EVENT evt_expire_point_after_2years
     ENABLE
     DO
     BEGIN
-        -- 1) 기준일 계산 : 오늘 기준 2년 전
+        -- 기준일 계산 : 오늘 기준 2년 전
         DECLARE v_cutoff DATE;
         SET v_cutoff = DATE_SUB(CURDATE(), INTERVAL 2 YEAR);
 
@@ -215,7 +215,6 @@ CREATE DEFINER = odd_adv_1@`%` EVENT evt_expire_point_after_2years
                                                 ELSE 0
                                                 END
                                     ), 0) AS old_saved,
-
                            -- 지금까지 사용/소멸한 포인트 합계 (절댓값, 양수로)
                            COALESCE(SUM( -- null이면 0으로 변경
                                             CASE
@@ -224,14 +223,12 @@ CREATE DEFINER = odd_adv_1@`%` EVENT evt_expire_point_after_2years
                                                 ELSE 0
                                                 END
                                     ), 0) AS used_or_expired
-
                     FROM user u
                              LEFT JOIN point_log pl
                                        ON pl.user_id = u.user_id
                     GROUP BY u.user_id) AS base) AS t
-        -- 3) 실제로 소멸할 포인트가 있는 유저만 INSERT
+        -- 실제로 소멸할 포인트가 있는 유저만 INSERT
         WHERE t.expire_amount > 0;
-
         -- point_log에 INSERT 되면
         -- BEFORE INSERT 트리거 -> balance_after 계산
         -- AFTER INSERT 트리거  -> user.point 에서 expire_amount 만큼 차감

@@ -96,3 +96,5 @@ SELECT user_id, count(*) FROM point_log
 WHERE created_at >= date_sub(now(),INTERVAL  1 year)
 AND status = 0
 GROUP BY user_id;
+
+SHOW EVENTS LIKE 'sch%';
