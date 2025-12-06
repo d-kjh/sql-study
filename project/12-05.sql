@@ -266,3 +266,4 @@ SET membership_id = (
     LIMIT 1
 )
 WHERE RAND() < 0.3;
+

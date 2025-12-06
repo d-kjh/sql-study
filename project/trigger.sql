@@ -318,3 +318,4 @@ BEGIN
     -- 새 로그 후의 잔액(balance_after) 계산
     SET NEW.balance_after = v_current_point + NEW.change_amount;
 END $$
+
