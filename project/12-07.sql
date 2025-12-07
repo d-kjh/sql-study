@@ -128,3 +128,75 @@ JOIN user u
 WHERE agg.total_spent >= 300000
 ORDER BY agg.total_spent DESC
 LIMIT 100;
+
+EXPLAIN
+SELECT
+    DATE(p.created_at) AS pay_date,
+    COUNT(*)           AS pay_cnt,
+    SUM(p.amount)      AS total_amount
+FROM payment p
+FORCE INDEX (idx_pay_status_created_amount)
+WHERE p.status = 1  -- 성공
+  AND p.created_at >= '2025-11-27'
+  AND p.created_at <  '2025-11-28'
+GROUP BY DATE(p.created_at)
+ORDER BY pay_date;
+
+CREATE INDEX idx_pay_status_created_amount
+    ON payment (status, created_at, amount);
+
+CREATE INDEX idx_pay_status_at
+    ON payment (status, created_at);
+
+DROP INDEX idx_pay_status_at ON payment;
+
+
+EXPLAIN
+SELECT
+    u.user_id,
+    u.name,
+    COUNT(DISTINCT r.reservation_id) AS reservation_cnt,
+    SUM(CASE WHEN r.status = 1 THEN r.price ELSE 0 END) AS total_spent
+FROM user u
+JOIN reservation r
+  ON r.user_id = u.user_id
+WHERE r.status = 1
+  AND r.created_at >= DATE_SUB(CURDATE(), INTERVAL 1 YEAR)
+GROUP BY u.user_id, u.name
+HAVING total_spent >= 300000
+ORDER BY total_spent DESC
+LIMIT 100;
+
+
+
+SELECT m.movie_id,
+       m.title,
+       COUNT(*)     AS audience_cnt,
+       SUM(r.price) AS total_price
+FROM movie m
+JOIN screen_schedule ss ON ss.movie_id = m.movie_id
+JOIN reservation r      ON r.schedule_id = ss.schedule_id
+WHERE r.status = 1
+GROUP BY m.movie_id, m.title
+ORDER BY audience_cnt DESC;
+
+
+-- 영화별 박스오피스 전용 인덱스
+CREATE INDEX idx_res_status_schedule_price
+    ON reservation (status, schedule_id, price);
+
+DROP INDEX idx_res_status_schedule_price on reservation;
+
+EXPLAIN
+SELECT
+    m.movie_id,
+    m.title,
+    COUNT(*)     AS audience_cnt
+FROM reservation r
+    FORCE INDEX (idx_res_status_schedule_price)   -- 🔥 이 인덱스 꼭 쓰게
+JOIN screen_schedule ss ON ss.schedule_id = r.schedule_id
+JOIN movie m            ON m.movie_id    = ss.movie_id
+WHERE r.status = 1
+GROUP BY m.movie_id, m.title
+ORDER BY audience_cnt DESC;
+
