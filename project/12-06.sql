@@ -114,7 +114,7 @@ VALUES ('김주현', 'dkjh9942@gmail.com',
         '1999-04-02', '00901',
         '010-9865-3296');
 
-SELECT u.name, c.`coupon_name`, c.`coupon_id`, cd.`issue_date`
+SELECT u.name, c.`coupon_id`, c.`coupon_name`, cd.`issue_date`, u.membership_id, u.card_num
 FROM `user` u
          JOIN `coupon_detail` cd
               ON cd.user_id = u.user_id
@@ -123,5 +123,9 @@ FROM `user` u
 WHERE u.name = '김주현';
 
 
-
-
+SELECT cl.* FROM coupon_log cl
+JOIN coupon_detail cd
+ON cd.user_coupon_id = cl.user_coupon_id
+JOIN user u
+ON u.user_id = cd.user_id
+WHERE u.name = '김주현';
