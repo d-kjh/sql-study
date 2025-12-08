@@ -105,7 +105,7 @@ CREATE INDEX idx_res_vip_status_created_user_price
     ON reservation (status, created_at, user_id, price);
 
 
-DROP INDEX idx_res_user_status_created ON reservation;
+DROP INDEX idx_res_vip_status_created_user_price ON reservation;
 
 
 SELECT
